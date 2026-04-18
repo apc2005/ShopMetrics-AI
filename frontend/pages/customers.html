@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — Customers</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS and Scripts -->
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+</head>
+<body>
+    <main class="main" id="main-content">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('Customer Segmentation', 'Loading data...');
+                loadCustomersData();
+            });
+        </script>
+        
+        <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-project-diagram"></i> RFM Matrix (Análisis Recencia, Frecuencia y Valor)</div>
+                    <span class="pill blue">Bubble</span>
+                </div>
+                <div class="card-body">
+                    <div style="width: 100%; min-height: 480px; position: relative;">
+                        <canvas id="rfmBubbleChart"></canvas>
+                    </div>
+                    <p style="font-size:11px;color:var(--text-muted);margin-top:14px; text-align:center;">
+                        * <b>X:</b> Recency (Días desde última compra) &nbsp;|&nbsp; <b>Y:</b> Frequency (Cantidad de tickets) &nbsp;|&nbsp; <b>Size:</b> Monetary (Valor total aportado).
+                    </p>
+                    
+                    <div style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.7; border: 1px dashed rgba(255,255,255,0.1);">
+                        <i class="fas fa-info-circle" style="color:var(--blue); margin-right:4px;"></i> <b>Cómo leer la Matriz Artificial:</b> El modelo expone cómo se distribuyen todos tus clientes. Las burbujas situadas <b>más a la izquierda y arriba</b> representan a tus clientes más leales (alta frecuencia y compra reciente), mientras que aquellos arrinconados hacia la derecha en la parte inferior tienen alto riesgo de abandono definitivo (Churn).
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-bottom:20px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-chart-bar"></i> Valor Promedio por Segmento</div>
+                    <span class="pill green">Polar Area</span>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        <canvas id="segmentPolarChart" style="max-height: 280px;"></canvas>
+                    </div>
+                    
+                    <div style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.7; border: 1px dashed rgba(255,255,255,0.1);">
+                        <i class="fas fa-lightbulb" style="color:var(--green); margin-right:4px;"></i> <b>Interpretación del Volumen:</b> El gráfico Polar ilustra cómo se concentra el volumen monetario según cada categoría de consumidor. Utiliza esta visualización para identificar a primera vista si el dinero de tu empresa está balanceado equitativamente, o si dependes peligrosamente de un solo segmento (por ejemplo, los "Champions"). Diseña retenciones si la mayor tajada está en "At Risk".
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-users"></i> RFM Segments Details
+                        <span class="section-sub" id="customersBadgeCount">0 customers</span>
+                    </div>
+                </div>
+                <table id="rfmTable" class="data-table">
+                    <thead>
+                        <tr><th>Customer</th><th>Recency</th><th>Frequency</th><th>Monetary</th><th>Segment</th><th>Churn %</th></tr>
+                    </thead>
+                    <tbody id="rfmTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('nav-badge-customers');
+            if(el) { el.style.display='inline'; el.textContent='...'; }
+        });
+        
+        async function loadCustomersData() {
+            const data = await window.appStorage.getCurrentAnalysis();
+            if(!data) { window.location.href = '/index.html'; return; }
+            document.getElementById('topbar-filename').textContent = data.filename;
+
+            const badge = document.getElementById('nav-badge-customers');
+            if(badge) {
+                badge.textContent = data.rfm_segments.length;
+                badge.style.display = 'inline';
+            }
+            document.getElementById('customersBadgeCount').textContent = data.rfm_segments.length + ' customers';
+
+            // Populate table
+            document.getElementById('rfmTableBody').innerHTML = data.rfm_segments.map(r => `
+                <tr>
+                    <td class="mono">${r.customer_id}</td>
+                    <td>${r.Recency}</td>
+                    <td>${r.Frequency}</td>
+                    <td class="mono">${fmt(r.Monetary)}</td>
+                    <td>${segTag(r.Segment_Label)}</td>
+                    <td style="color:${churnColor(r.Churn_Probability)};font-weight:600">${pct(r.Churn_Probability)}</td>
+                </tr>
+            `).join('');
+
+            $('#rfmTable').DataTable({
+                pageLength: 10,
+                lengthChange: true,
+                language: { paginate: { next: '›', previous: '‹' } }
+            });
+
+            // Bubble Chart (Sample data for performance)
+            const sampleSize = Math.min(data.rfm_segments.length, 300);
+            const sampleData = data.rfm_segments.slice(0, sampleSize).map(r => ({
+                x: r.Recency,
+                y: r.Frequency,
+                r: Math.max(3, Math.min(20, r.Monetary / 100)),
+                segment: r.Segment_Label || 'Unknown'
+            }));
+
+            const datasets = {};
+            sampleData.forEach(d => {
+                if(!datasets[d.segment]) datasets[d.segment] = [];
+                datasets[d.segment].push(d);
+            });
+
+            const bCtx = document.getElementById('rfmBubbleChart').getContext('2d');
+            new Chart(bCtx, {
+                type: 'bubble',
+                data: {
+                    datasets: Object.keys(datasets).map(seg => ({
+                        label: seg,
+                        data: datasets[seg],
+                        backgroundColor: SEGMENT_COLORS[seg] || '#555',
+                        borderWidth: 0
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: {display:true, text:'Recency (Días desde la última compra)', color:'#8b8fa8', font:{size:12}}, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#8b8fa8'} },
+                        y: { title: {display:true, text:'Frequency (Número de compras)', color:'#8b8fa8', font:{size:12}}, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#8b8fa8'} }
+                    },
+                    plugins: { legend: { position: 'top', labels: { color: '#8b8fa8' } } }
+                }
+            });
+
+            // Polar Area
+            const pCtx = document.getElementById('segmentPolarChart').getContext('2d');
+            const segCounts = {};
+            data.rfm_segments.forEach(r => { const s = r.Segment_Label || 'Unknown'; segCounts[s] = (segCounts[s] || 0) + 1; });
+            
+            new Chart(pCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: Object.keys(segCounts),
+                    datasets: [{
+                        data: Object.values(segCounts),
+                        backgroundColor: Object.keys(segCounts).map(s => {
+                            const hex = SEGMENT_COLORS[s] || '#555';
+                            return hex + '80'; // 50% opacity
+                        }),
+                        borderColor: Object.keys(segCounts).map(s => SEGMENT_COLORS[s] || '#555'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { display: false } } },
+                    plugins: { legend: { position: 'right', labels: { color: '#8b8fa8' } } }
+                }
+            });
+
+            document.getElementById('page-content').style.opacity = '1';
+        }
+    </script>
+</body>
+</html>

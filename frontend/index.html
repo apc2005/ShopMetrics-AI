@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — Upload</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS and Scripts -->
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+</head>
+<body>
+    <!-- Sidebar is injected by layout.js automatically -->
+    <main class="main">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('Import Data', 'Upload your supermarket logs');
+            });
+        </script>
+        
+        <div class="content">
+            <!-- UPLOAD -->
+            <div id="uploadSection" style="display: flex;">
+                <div class="upload-card" id="uploadArea">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h2>Import your dataset</h2>
+                    <p>Drag & drop a CSV file here, or click below to select<br>Format: customer_id, date, total_sales…</p>
+                    <label for="csvFile2" class="btn-upload">
+                        <i class="fas fa-folder-open"></i> Select CSV file
+                    </label>
+                    <input type="file" id="csvFile2" accept=".csv" style="display:none">
+                    <div class="upload-hint">Supports: RFM segmentation · Churn prediction · Sales forecast · Inventory analysis</div>
+                </div>
+            </div>
+
+            <!-- LOADING -->
+            <div id="loadingSection">
+                <div class="spinner-ring"></div>
+                <div class="loading-text">Analyzing with AI…</div>
+                <div class="loading-sub">RFM Segmentation → Churn Model → Sales Forecast → Inventory</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Upload logic
+        const fileInput2 = document.getElementById('csvFile2');
+        const uploadArea = document.getElementById('uploadArea');
+
+        fileInput2.addEventListener('change', e => handleFiles(e.target.files));
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+            uploadArea.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+        });
+        ['dragenter', 'dragover'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.add('dragover')));
+        ['dragleave', 'drop'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.remove('dragover')));
+        uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+        async function handleFiles(files) {
+            if (!files.length) return;
+            const file = files[0];
+            if (!file.name.endsWith('.csv')) { alert('Por favor selecciona un archivo CSV'); return; }
+
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'flex';
+            
+            // Si el topbar filename object está listo, actualizamos su texto
+            const filenameLabel = document.getElementById('topbar-filename');
+            if(filenameLabel) filenameLabel.textContent = file.name;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:5050/analyze', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Error del servidor');
+                
+                // Save to our generic Storage service
+                await window.appStorage.saveAnalysis(file.name, result);
+                
+                // Redirect directly to overview
+                window.location.href = '/pages/overview.html';
+                
+            } catch (error) {
+                console.error(error);
+                alert(`Error: ${error.message}\n\nVerifica que el servidor esté corriendo en http://localhost:5050`);
+                document.getElementById('uploadSection').style.display = 'flex';
+            } finally {
+                document.getElementById('loadingSection').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

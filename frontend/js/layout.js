@@ -50,6 +50,11 @@ function renderSidebar() {
                         <span class="nav-icon"><i class="fas fa-chart-line"></i></span> Analytics
                     </div>
                 </a>
+                <a href="/pages/ai.html" class="nav-item-link" style="text-decoration:none;">
+                    <div class="nav-item ${activePage === 'ai' ? 'active' : ''}">
+                        <span class="nav-icon"><i class="fas fa-robot"></i></span> AI Advisor
+                    </div>
+                </a>
                 <a href="/pages/inventory.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isInventory ? 'active' : ''}">
                         <span class="nav-icon"><i class="fas fa-box"></i></span> Inventory

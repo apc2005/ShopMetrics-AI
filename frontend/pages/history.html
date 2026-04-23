@@ -169,7 +169,12 @@
                         <div class="hc-header">
                             <div class="hc-icon"><i class="fas fa-file-csv"></i></div>
                             <div class="hc-title-wrapper">
-                                <div class="hc-filename">${item.filename}</div>
+                                <div style="display:flex; align-items:center;">
+                                    <div class="hc-filename" title="${item.filename}">${item.filename}</div>
+                                    <button onclick="editAnalysisName(event, ${item.id}, '${item.filename.replace(/'/g, "\\'")}')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; margin-left:8px;" title="Rename">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
                                 <div class="hc-date"><i class="far fa-clock"></i> ${formatDate(item.date)}</div>
                             </div>
                             <button class="hc-delete" onclick="deleteAnalysis(event, ${item.id})" title="Delete">
@@ -182,8 +187,8 @@
                                 <div class="hc-stat-label">Total Rows</div>
                             </div>
                             <div class="hc-stat">
-                                <div class="hc-stat-val" style="color:var(--green)">$${formatShort(item.kpis?.total_revenue_ytd)}</div>
-                                <div class="hc-stat-label">YTD Revenue</div>
+                                <div class="hc-stat-val" style="color:var(--green)">$${formatShort(item.kpis?.['Ventas Totales'])}</div>
+                                <div class="hc-stat-label">Total Revenue</div>
                             </div>
                         </div>
                         <div class="hc-action">
@@ -220,6 +225,20 @@
                     localStorage.removeItem('currentAnalysisId');
                 }
                 loadHistory(); // Reload grid
+            }
+        };
+
+        window.editAnalysisName = async function(event, id, currentName) {
+            event.stopPropagation();
+            const newName = prompt("Enter a new name for this analysis:", currentName);
+            if (newName !== null && newName.trim() !== "" && newName !== currentName) {
+                try {
+                    await window.appStorage.updateFilename(id, newName.trim());
+                    loadHistory();
+                } catch (err) {
+                    console.error("Error updating name:", err);
+                    alert("Could not update the name.");
+                }
             }
         };
     </script>

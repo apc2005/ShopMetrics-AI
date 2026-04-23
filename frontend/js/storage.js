@@ -93,6 +93,29 @@ class StorageService {
         });
     }
 
+    // Actualiza el nombre de un análisis
+    async updateFilename(id, newFilename) {
+        if (!this.db) await this.init();
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.get(Number(id));
+
+            request.onsuccess = () => {
+                const record = request.result;
+                if (record) {
+                    record.filename = newFilename;
+                    const updateRequest = store.put(record);
+                    updateRequest.onsuccess = () => resolve();
+                    updateRequest.onerror = (e) => reject(e.target.error);
+                } else {
+                    reject(new Error("Record not found"));
+                }
+            };
+            request.onerror = (e) => reject(e.target.error);
+        });
+    }
+
     // Obtiene el análisis que está marcado como actual
     async getCurrentAnalysis() {
         const currentId = localStorage.getItem('currentAnalysisId');

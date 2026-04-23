@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket BI — Overview</title>
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/storage.js"></script>
     <script src="/js/layout.js"></script>
 </head>
+
 <body>
     <main class="main" id="main-content">
         <script>
@@ -50,9 +53,13 @@
                             </div>
                         </div>
                         <div class="segment-legend" id="segmentLegendContainer"></div>
-                        
-                        <div style="margin-top:20px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.6; border: 1px dashed rgba(255,255,255,0.1);">
-                            <i class="fas fa-info-circle" style="color:var(--green); margin-right:4px;"></i> <b>Interpretación:</b> Observa el porcentaje del sector "At Risk" o "Hibernating". Un sector rojo o naranja muy amplio significa que necesitas reactivar las campañas de marketing para no perder usuarios dormidos.
+
+                        <div
+                            style="margin-top:20px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.6; border: 1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-info-circle" style="color:var(--green); margin-right:4px;"></i>
+                            <b>Interpretación:</b> Observa el porcentaje del sector "At Risk" o "Hibernating". Un sector
+                            rojo o naranja muy amplio significa que necesitas reactivar las campañas de marketing para
+                            no perder usuarios dormidos.
                         </div>
                     </div>
                 </div>
@@ -64,7 +71,14 @@
                     </div>
                     <table id="churnTable" class="data-table">
                         <thead>
-                            <tr><th>Customer</th><th>R</th><th>F</th><th>M</th><th>Churn Risk</th><th>Segment</th></tr>
+                            <tr>
+                                <th>Customer</th>
+                                <th>R</th>
+                                <th>F</th>
+                                <th>M</th>
+                                <th>Churn Risk</th>
+                                <th>Segment</th>
+                            </tr>
                         </thead>
                         <tbody id="churnTableBody"></tbody>
                     </table>
@@ -84,9 +98,13 @@
                     </div>
                     <div class="card-body">
                         <canvas id="forecastChart" height="260"></canvas>
-                        
-                        <div style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.6; border: 1px dashed rgba(255,255,255,0.1);">
-                            <i class="fas fa-magic" style="color:var(--accent-light); margin-right:4px;"></i> <b>Cómo leer el Forecast:</b> La línea verde sólida muestra tus ingresos históricos confirmados. La línea punteada flotante azul es la predicción del modelo basada en Prophet (tendencias y estacionalidad). Usa esto para estimar tu inventario futuro.
+
+                        <div
+                            style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.6; border: 1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-magic" style="color:var(--accent-light); margin-right:4px;"></i> <b>Cómo
+                                leer el Forecast:</b> La línea verde sólida muestra tus ingresos históricos confirmados.
+                            La línea punteada flotante azul es la predicción del modelo basada en Prophet (tendencias y
+                            estacionalidad). Usa esto para estimar tu inventario futuro.
                         </div>
                     </div>
                 </div>
@@ -116,13 +134,13 @@
     <script>
         async function loadOverviewData() {
             const data = await window.appStorage.getCurrentAnalysis();
-            if(!data) {
+            if (!data) {
                 window.location.href = '/index.html';
                 return;
             }
 
             document.getElementById('topbar-filename').textContent = data.filename + ` (${data.rows.toLocaleString()} rows processing result)`;
-            
+
             // KPIs
             const kpiColors = ['accent', 'green', 'blue', 'amber', 'red', 'accent', 'green', 'blue'];
             document.getElementById('kpiContainer').innerHTML = Object.entries(data.kpis).map(([key, value], i) => `
@@ -138,7 +156,7 @@
             data.rfm_segments.forEach(r => { const s = r.Segment_Label || 'Unknown'; segCounts[s] = (segCounts[s] || 0) + 1; });
             const totalSeg = Object.values(segCounts).reduce((a, b) => a + b, 0);
             document.getElementById('totalSegVal').textContent = totalSeg.toLocaleString();
-            
+
             document.getElementById('segmentLegendContainer').innerHTML = Object.entries(segCounts).map(([seg, cnt]) => `
                 <div class="seg-item">
                     <div class="seg-dot" style="background:${SEGMENT_COLORS[seg] || '#ccc'}"></div>
@@ -250,4 +268,5 @@
         }
     </script>
 </body>
+
 </html>

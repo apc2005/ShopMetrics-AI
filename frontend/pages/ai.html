@@ -491,7 +491,7 @@
 
             <!-- Section header -->
             <div class="section-header">
-                <div class="section-title">AI Advisor <span class="section-sub">Powered by Gemini 2.5 Flash</span></div>
+                <div class="section-title">AI Advisor <span class="section-sub">Powered by Mistral AI</span></div>
                 <span class="pill green"><i class="fas fa-circle" style="font-size:6px"></i> Online</span>
             </div>
 
@@ -574,7 +574,8 @@
                             <div class="response-meta" id="responseMeta" style="display:none;">
                                 <div class="response-model-badge">
                                     <div class="dot"></div>
-                                    Gemini 2.5 Flash
+                                Mistral AI
+                                
                                 </div>
                                 <button id="copyBtn" class="icon-btn" title="Copiar respuesta"
                                     style="width:28px;height:28px;font-size:11px;">
@@ -609,7 +610,7 @@
                                         <div class="step-dot"></div> Preparando contexto de datos
                                     </div>
                                     <div class="loading-step" id="step2">
-                                        <div class="step-dot"></div> Consultando Gemini 2.5 Flash
+                                        <div class="step-dot"></div> Consultando Mistral AI
                                     </div>
                                     <div class="loading-step" id="step3">
                                         <div class="step-dot"></div> Procesando respuesta
@@ -758,14 +759,14 @@
 
             // 1. CLAVE FORZADA (Evita el error "API Key not found")
                 // Use configurable key with prompt fallback
-                let apiKey = window.GEMINI_API_KEY;
+                let apiKey = window.MISTRAL_API_KEY;
                 if (!apiKey) {
-                    apiKey = prompt('Ingresa tu clave API de Gemini (gratis en https://aistudio.google.com/app/apikey):');
+                    apiKey = prompt('Ingresa tu clave API de Mistral (gratis en https://console.mistral.ai/):');
                     if (apiKey) {
-                        localStorage.setItem('gemini_api_key', apiKey);
-                        window.GEMINI_API_KEY = apiKey;
-                    } else {
-                        throw new Error('Se necesita una clave API de Gemini para continuar.');
+                        localStorage.setItem('mistral_api_key', apiKey);
+                        window.MISTRAL_API_KEY = apiKey;
+                } else {
+                        throw new Error('Se necesita una clave API de Mistral para continuar.');
                     }
                 }
 
@@ -796,22 +797,18 @@
             - Usa tablas markdown para comparaciones
             - Organiza la respuesta con encabezados claros`;
 
-                    // Model fallback logic from ai-config.js
-                    // Use stable/fast model directly (fallback commented out to avoid complexity)
-                    const model = 'models/gemini-1.5-flash-exp';
-                    let endpoint = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${apiKey}`;
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: fullPrompt }]
-                        }]
-                    })
-                });
+                    const endpoint = 'https://api.mistral.ai/v1/chat/completions';
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'mistral-small-latest',
+                            messages: [{ role: 'user', content: fullPrompt }]
+                        })
+                    });
 
                 setLoadingStep(3);
 
@@ -822,16 +819,16 @@
                 }
 
                 const data = await response.json();
-                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const text = data.choices[0].message.content;
 
                 if (!text) throw new Error('La IA no devolvió contenido.');
 
                 lastResponseText = text;
 
                 // Update model badge with successful model
-                const usedModel = '1.5 Flash Exp';
+                const usedModel = 'Mistral Small Latest';
                 document.querySelector('.response-model-badge').innerHTML = `
-                    <div class="dot"></div> Gemini ${usedModel} ✅
+                    <div class="dot"></div> ${usedModel} ✅
                 `;
 
                 // Renderizar resultado
@@ -849,8 +846,8 @@
                 let suggestion = '';
 
                 // Simplified: Direct advice for API key issues
-                if (errorMsg.includes('API Key not found')) {
-                    suggestion = '<br><strong>La clave API no es válida. </strong><br>1. Ve a <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a><br>2. Crea nueva clave GRATIS<br>3. Pégala cuando se te pida.';
+                if (errorMsg.includes('API Key not found') || errorMsg.includes('Unauthorized') || errorMsg.includes('401')) {
+                    suggestion = '<br><strong>La clave API no es válida. </strong><br>1. Ve a <a href="https://console.mistral.ai/" target="_blank">console.mistral.ai</a><br>2. Crea una nueva clave GRATIS<br>3. Pégala cuando se te pida.';
                 }
 
                 document.getElementById('loadingState').style.display = 'none';
@@ -862,7 +859,7 @@
                         <div class="error-card-msg">
                             <strong>Error al consultar la IA</strong><br>
                             ${errorMsg}${suggestion}<br><br>
-                            <small>✅ Verifica tu clave en <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> (gratis)</small>
+                            <small>✅ Verifica tu clave en <a href="https://console.mistral.ai/" target="_blank">Mistral AI Console</a> (gratis)</small>
                         </div>
                     </div>
                 `;
@@ -871,13 +868,7 @@
             }
         }
 
-        // Helper for model-specific calls (used in fallback)
-        async function generateAIAdviceWithModel(prompt, model, apiKey) {
-            // Reuse same logic but force specific model
-            const context = buildContext();
-            const fullPrompt = `Eres un consultor experto...`; // Reuse fullPrompt construction
-            // ... (same fetch logic with specified model)
-        }
+
 
         function buildContext() {
             if (!currentData) {

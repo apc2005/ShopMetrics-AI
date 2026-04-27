@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — AI Advisor</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="../js/ai-config.js"></script>
+
+    <style>
+        /* ── AI PAGE SPECIFIC ── */
+        .ai-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .ai-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar panel */
+        .ai-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: sticky;
+            top: 88px;
+        }
+
+        /* Prompt textarea */
+        .prompt-textarea {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 160px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .prompt-textarea:focus {
+            border-color: var(--border-accent);
+        }
+
+        .prompt-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Quick prompt chips */
+        .quick-prompts {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .quick-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .quick-chip:hover {
+            background: var(--accent-glow);
+            border-color: var(--border-accent);
+            color: var(--accent-light);
+        }
+
+        .quick-chip i {
+            width: 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* Generate button */
+        .btn-generate {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #8b5cf6, var(--accent));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-generate:hover::before {
+            opacity: 1;
+        }
+
+        .btn-generate span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Response area */
+        .response-area {
+            min-height: 500px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 460px;
+            gap: 14px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: var(--accent-glow);
+            border: 1px solid var(--border-accent);
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            color: var(--accent-light);
+        }
+
+        .empty-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .empty-sub {
+            font-size: 12px;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+
+        /* Loading state */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 460px;
+            gap: 18px;
+        }
+
+        .loading-orb {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--accent), #8b5cf6, var(--accent));
+            animation: spin-orb 1.2s linear infinite;
+            position: relative;
+        }
+
+        .loading-orb::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: var(--bg-card);
+        }
+
+        @keyframes spin-orb {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-msg {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .loading-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 200px;
+        }
+
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: color 0.4s;
+        }
+
+        .loading-step.active {
+            color: var(--accent-light);
+        }
+
+        .loading-step.done {
+            color: var(--green);
+        }
+
+        .step-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* AI Response markdown styles */
+        .ai-response-content {
+            line-height: 1.75;
+            font-size: 13.5px;
+            color: var(--text-primary);
+        }
+
+        .ai-response-content h1,
+        .ai-response-content h2,
+        .ai-response-content h3,
+        .ai-response-content h4 {
+            margin: 24px 0 10px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .ai-response-content h1 {
+            font-size: 18px;
+            color: var(--accent-light);
+        }
+
+        .ai-response-content h2 {
+            font-size: 15px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .ai-response-content h3 {
+            font-size: 13px;
+            color: var(--accent-light);
+        }
+
+        .ai-response-content p {
+            margin: 10px 0;
+            color: var(--text-secondary);
+        }
+
+        .ai-response-content ul,
+        .ai-response-content ol {
+            margin: 10px 0 10px 20px;
+            color: var(--text-secondary);
+        }
+
+        .ai-response-content li {
+            margin: 5px 0;
+        }
+
+        .ai-response-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .ai-response-content code {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-light);
+        }
+
+        .ai-response-content pre {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            overflow-x: auto;
+            margin: 14px 0;
+        }
+
+        .ai-response-content pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .ai-response-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 12px;
+        }
+
+        .ai-response-content table th {
+            padding: 9px 14px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        .ai-response-content table td {
+            padding: 9px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        .ai-response-content table tr:hover td {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .ai-response-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 10px 16px;
+            margin: 14px 0;
+            background: var(--accent-glow);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Response header meta */
+        .response-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .response-model-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--accent-glow);
+            border: 1px solid var(--border-accent);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent-light);
+        }
+
+        .response-model-badge .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Error card */
+        .error-card {
+            background: var(--red-bg);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .error-card i {
+            color: var(--red);
+            font-size: 16px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .error-card-msg {
+            font-size: 13px;
+            color: var(--red-light);
+            line-height: 1.6;
+        }
+
+        .context-info {
+            padding: 12px 16px;
+            background: var(--bg-surface);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .context-info i {
+            color: var(--accent-light);
+            margin-right: 4px;
+        }
+
+        .context-kpi-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .ctx-kpi {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-family: 'DM Mono', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main" id="main-content">
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('AI Advisor', 'Consultor inteligente');
+                initAIPage();
+            });
+        </script>
+
+        <div class="content" id="page-content">
+
+            <!-- Section header -->
+            <div class="section-header">
+                <div class="section-title">AI Advisor <span class="section-sub">Powered by Mistral AI</span></div>
+                <span class="pill green"><i class="fas fa-circle" style="font-size:6px"></i> Online</span>
+            </div>
+
+            <div class="ai-layout">
+
+                <!-- LEFT: Input panel -->
+                <div class="ai-sidebar">
+
+                    <!-- Prompt card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="card-icon fas fa-comment-dots"></i> Tu pregunta</div>
+                        </div>
+                        <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+                            <textarea id="userPrompt" class="prompt-textarea" rows="6"
+                                placeholder="Ej: ¿Cómo aumentar ventas y reducir costes?"></textarea>
+
+                            <button id="generateBtn" class="btn-generate">
+                                <span><i class="fas fa-sparkles" style="margin-right:6px;"></i>Generar análisis</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick prompts -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="card-icon fas fa-bolt"></i> Preguntas rápidas</div>
+                        </div>
+                        <div class="card-body" style="padding:12px;">
+                            <div class="quick-prompts" id="quickPrompts">
+                                <button class="quick-chip" data-prompt="completo">
+                                    <i class="fas fa-chart-line"></i>
+                                    Análisis completo + plan 90 días
+                                </button>
+                                <button class="quick-chip" data-prompt="churn">
+                                    <i class="fas fa-user-minus"></i>
+                                    Estrategia anti-churn por segmento
+                                </button>
+                                <button class="quick-chip" data-prompt="ventas">
+                                    <i class="fas fa-trending-up"></i>
+                                    Cómo aumentar ticket medio
+                                </button>
+                                <button class="quick-chip" data-prompt="inventario">
+                                    <i class="fas fa-boxes"></i>
+                                    Optimizar inventario y evitar roturas
+                                </button>
+                                <button class="quick-chip" data-prompt="marketing">
+                                    <i class="fas fa-bullhorn"></i>
+                                    Campañas de marketing por segmento
+                                </button>
+                                <button class="quick-chip" data-prompt="forecast">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Interpretar el forecast de ventas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Context info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="card-icon fas fa-database"></i> Contexto activo</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="context-info">
+                                <i class="fas fa-info-circle"></i>
+                                <b>La IA tiene acceso a tus KPIs, segmentos RFM, productos top y forecast.</b>
+                                <div class="context-kpi-row" id="contextKpis"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT: Response panel -->
+                <div class="response-area">
+                    <div class="card" style="height:100%;">
+                        <div class="card-header" id="responseHeader">
+                            <div class="card-title"><i class="card-icon fas fa-brain"></i> Respuesta del asesor</div>
+                            <div class="response-meta" id="responseMeta" style="display:none;">
+                                <div class="response-model-badge">
+                                    <div class="dot"></div>
+                                Mistral AI
+                                
+                                </div>
+                                <button id="copyBtn" class="icon-btn" title="Copiar respuesta"
+                                    style="width:28px;height:28px;font-size:11px;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button id="clearBtn" class="icon-btn" title="Nueva consulta"
+                                    style="width:28px;height:28px;font-size:11px;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="responseBody">
+
+                            <!-- Empty state -->
+                            <div class="empty-state" id="emptyState">
+                                <div class="empty-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="empty-title">Asesor IA listo</div>
+                                <div class="empty-sub">
+                                    Escribe una pregunta o usa las preguntas rápidas para obtener análisis basados en
+                                    tus datos reales.
+                                </div>
+                            </div>
+
+                            <!-- Loading state -->
+                            <div class="loading-state" id="loadingState" style="display:none;">
+                                <div class="loading-orb"></div>
+                                <div class="loading-msg">Analizando tus datos...</div>
+                                <div class="loading-steps">
+                                    <div class="loading-step active" id="step1">
+                                        <div class="step-dot"></div> Preparando contexto de datos
+                                    </div>
+                                    <div class="loading-step" id="step2">
+                                        <div class="step-dot"></div> Consultando Mistral AI
+                                    </div>
+                                    <div class="loading-step" id="step3">
+                                        <div class="step-dot"></div> Procesando respuesta
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Response content -->
+                            <div id="aiResponseContent" style="display:none;">
+                                <div class="ai-response-content" id="responseContent"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const QUICK_PROMPTS = {
+            completo: `Analiza estos datos de mi supermercado y dame un análisis completo con:
+
+1. Resumen ejecutivo de la situación actual
+2. Principales oportunidades de crecimiento de ventas
+3. Cómo mejorar márgenes y reducir costes operativos
+4. Estrategia para reducir el churn de clientes
+5. Recomendaciones de optimización de inventario
+6. Plan de acción concreto para los próximos 90 días con KPIs medibles`,
+
+            churn: `Basándote en los segmentos RFM y la probabilidad de churn de mis clientes, dame una estrategia anti-churn detallada:
+
+1. Qué segmentos están en mayor riesgo y por qué
+2. Acciones concretas para reactivar clientes dormidos
+3. Qué incentivos aplicar a cada segmento
+4. Cómo medir el éxito de las campañas de retención
+5. Frecuencia óptima de contacto con cada tipo de cliente`,
+
+            ventas: `Analiza mis datos de ventas y dame estrategias concretas para aumentar el ticket medio:
+
+1. Qué productos o categorías tienen mayor potencial de upsell
+2. Técnicas de cross-selling basadas en mis productos top
+3. Estrategias de pricing para maximizar margen
+4. Cómo mejorar la experiencia de compra para aumentar conversión
+5. KPIs para medir el incremento del ticket medio`,
+
+            inventario: `Analiza mis datos de ventas y forecast para darme recomendaciones de gestión de inventario:
+
+1. Qué productos tienen riesgo de rotura de stock
+2. Qué productos generan sobreinventario y cómo reducirlo
+3. Cómo usar el forecast para planificar pedidos
+4. Estrategia de gestión de productos de temporada
+5. Cómo reducir mermas y pérdidas por caducidad`,
+
+            marketing: `Diseña una estrategia de marketing personalizada basada en mis segmentos de clientes RFM:
+
+1. Mensaje y oferta ideal para cada segmento
+2. Canales de comunicación recomendados por segmento
+3. Frecuencia óptima de campañas
+4. Ideas creativas de promociones para reactivar clientes dormidos
+5. Budget sugerido y ROI esperado por segmento`,
+
+            forecast: `Explícame mi forecast de ventas en términos de negocio:
+
+1. Qué tendencia muestra el modelo y qué significa para mi negocio
+2. En qué meses debería reforzar el inventario
+3. Si hay estacionalidad, cómo aprovecharla
+4. Qué factores podrían hacer que el forecast falle
+5. Cómo usar la predicción para tomar decisiones de personal y compras`
+        };
+
+        let currentData = null;
+        let lastResponseText = '';
+
+        async function initAIPage() {
+            try {
+                currentData = await window.appStorage?.getCurrentAnalysis();
+            } catch (e) {
+                currentData = null;
+            }
+
+            // Fill context KPIs
+            if (currentData?.kpis) {
+                const entries = Object.entries(currentData.kpis).slice(0, 4);
+                document.getElementById('contextKpis').innerHTML = entries.map(([k, v]) =>
+                    `<div class="ctx-kpi">${k.replace(/_/g, ' ')}: ${v}</div>`
+                ).join('');
+            }
+
+            // Default prompt
+            document.getElementById('userPrompt').value = QUICK_PROMPTS.completo;
+
+            // Generate button
+            document.getElementById('generateBtn').onclick = generateAIAdvice;
+
+            // Quick prompt chips
+            document.querySelectorAll('.quick-chip').forEach(btn => {
+                btn.onclick = () => {
+                    const key = btn.dataset.prompt;
+                    document.getElementById('userPrompt').value = QUICK_PROMPTS[key] || '';
+                    document.getElementById('userPrompt').focus();
+                };
+            });
+
+            // Copy button
+            document.getElementById('copyBtn').onclick = () => {
+                navigator.clipboard.writeText(lastResponseText)
+                    .then(() => {
+                        const btn = document.getElementById('copyBtn');
+                        btn.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+                    });
+            };
+
+            // Clear button
+            document.getElementById('clearBtn').onclick = resetToEmpty;
+        }
+
+        function resetToEmpty() {
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('aiResponseContent').style.display = 'none';
+            document.getElementById('responseMeta').style.display = 'none';
+            lastResponseText = '';
+        }
+
+        function setLoadingStep(step) {
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById('step' + i);
+                el.classList.remove('active', 'done');
+                if (i < step) el.classList.add('done');
+                else if (i === step) el.classList.add('active');
+            }
+        }
+
+        async function generateAIAdvice() {
+            const prompt = document.getElementById('userPrompt').value.trim();
+            if (!prompt) {
+                alert('Por favor, escribe una pregunta antes de continuar.');
+                return;
+            }
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+
+            let apiKey = window.MISTRAL_API_KEY;
+            if (!apiKey) {
+                apiKey = prompt('Ingresa tu clave API de Mistral (gratis en https://console.mistral.ai/):');
+                if (apiKey) {
+                    localStorage.setItem('mistral_api_key', apiKey);
+                        window.MISTRAL_API_KEY = apiKey;
+                } else {
+                        throw new Error('Se necesita una clave API de Mistral para continuar.');
+                    }
+                }
+
+                // Mostrar estados de carga
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('aiResponseContent').style.display = 'none';
+                document.getElementById('responseMeta').style.display = 'none';
+                document.getElementById('loadingState').style.display = 'flex';
+                setLoadingStep(1);
+
+                try {
+                    // Preparar contexto de datos
+                    const context = buildContext();
+                    setLoadingStep(2);
+
+            const fullPrompt = `# ROL Y CONTEXTO 
+            Eres un consultor senior especializado en retail y gestión empresarial con 20 años de experiencia. 
+            Tu misión es analizar datos reales de negocio y proporcionar insights accionables que generen impacto directo en la rentabilidad y operaciones de la empresa.
+
+            ## DATOS DEL NEGOCIO:
+            ${context}
+
+            ## PREGUNTA DEL GESTOR:
+            ${prompt}
+
+            ## INSTRUCCIONES DE RESPUESTA:
+            - Responde siempre en español
+            - Usa un tono profesional pero cercano
+            - Incluye datos concretos y cifras cuando sea posible
+            - Usa tablas markdown para comparaciones
+            - Organiza la respuesta con encabezados claros`;
+
+                    const endpoint = 'https://api.mistral.ai/v1/chat/completions';
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'mistral-small-latest',
+                            messages: [{ role: 'user', content: fullPrompt }]
+                        })
+                    });
+
+                setLoadingStep(3);
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    const errMsg = errData?.error?.message || `Error HTTP ${response.status}`;
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                const text = data.choices[0].message.content;
+
+                if (!text) throw new Error('La IA no devolvió contenido.');
+
+                lastResponseText = text;
+
+                // Update model badge with successful model
+                const usedModel = 'Mistral Small Latest';
+                document.querySelector('.response-model-badge').innerHTML = `
+                    <div class="dot"></div> ${usedModel} ✅
+                `;
+
+                // Renderizar resultado
+                document.getElementById('responseContent').innerHTML = marked.parse(text);
+                if (window.hljs) hljs.highlightAll();
+
+                // Mostrar interfaz de respuesta
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('aiResponseContent').style.display = 'block';
+                document.getElementById('responseMeta').style.display = 'flex';
+
+            } catch (error) {
+                console.error("Error en AI Advisor:", error);
+                let errorMsg = error.message;
+                let suggestion = '';
+
+                // Simplified: Direct advice for API key issues
+                if (errorMsg.includes('API Key not found') || errorMsg.includes('Unauthorized') || errorMsg.includes('401')) {
+                    suggestion = '<br><strong>La clave API no es válida. </strong><br>1. Ve a <a href="https://console.mistral.ai/" target="_blank">console.mistral.ai</a><br>2. Crea una nueva clave GRATIS<br>3. Pégala cuando se te pida.';
+                }
+
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('aiResponseContent').style.display = 'block';
+                document.getElementById('responseMeta').style.display = 'none';
+                document.getElementById('responseContent').innerHTML = `
+                    <div class="error-card">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="error-card-msg">
+                            <strong>Error al consultar la IA</strong><br>
+                            ${errorMsg}${suggestion}<br><br>
+                            <small>Verifica tu clave en <a href="https://console.mistral.ai/" target="_blank">Mistral AI Console</a> (gratis)</small>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+
+
+        function buildContext() {
+            if (!currentData) {
+                return 'No hay datos cargados actualmente. Responde de forma genérica sobre gestión de supermercados.';
+            }
+
+            const parts = [];
+
+            if (currentData.kpis) {
+                parts.push('### KPIs Principales:\n' + Object.entries(currentData.kpis)
+                    .map(([k, v]) => `- ${k.replace(/_/g, ' ')}: ${v}`)
+                    .join('\n'));
+            }
+
+            if (currentData.rfm_segments) {
+                const segCounts = {};
+                currentData.rfm_segments.forEach(r => {
+                    const s = r.Segment_Label || 'Unknown';
+                    segCounts[s] = (segCounts[s] || 0) + 1;
+                });
+                const total = Object.values(segCounts).reduce((a, b) => a + b, 0);
+                parts.push('### Segmentos de Clientes (RFM):\n' + Object.entries(segCounts)
+                    .map(([s, n]) => `- ${s}: ${n} clientes (${((n / total) * 100).toFixed(1)}%)`)
+                    .join('\n'));
+
+                const highChurn = currentData.rfm_segments.filter(r => parseFloat(r.Churn_Probability || 0) > 0.5).length;
+                parts.push(`### Tasa de Churn: ${((highChurn / total) * 100).toFixed(1)}% de clientes en riesgo alto`);
+            }
+
+            if (currentData.top_products) {
+                parts.push('### Top 10 Productos por Ventas:\n' + currentData.top_products.slice(0, 10)
+                    .map((p, i) => `${i + 1}. ${JSON.stringify(p)}`)
+                    .join('\n'));
+            }
+
+            if (currentData.categories) {
+                parts.push('### Categorías:\n' + JSON.stringify(currentData.categories, null, 2));
+            }
+
+            if (currentData.model_metrics) {
+                parts.push('### Métricas del Modelo Predictivo:\n' + Object.entries(currentData.model_metrics)
+                    .filter(([k]) => !k.includes('confusion') && !k.includes('matrix'))
+                    .map(([k, v]) => `- ${k}: ${v}`)
+                    .join('\n'));
+            }
+
+            if (currentData.forecast) {
+                const method = currentData.forecast.method || 'Prophet';
+                const lastForecast = currentData.forecast.data?.slice(-3) || [];
+                parts.push(`### Forecast de Ventas (método: ${method}):\n` + lastForecast
+                    .map(r => `- ${r.ds}: predicción ${r.yhat}`)
+                    .join('\n'));
+            }
+
+            return parts.join('\n\n');
+        }
+    </script>
+
+</body>
+
+</html>

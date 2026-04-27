@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — Transactions</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS and Scripts -->
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+</head>
+<body>
+    <main class="main" id="main-content">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('Transactions', 'Data Quality Report');
+                loadTransactionsData();
+            });
+        </script>
+        <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
+            <div class="section-header">
+                <div class="section-title">Reporte de Calidad de Datos <span class="section-sub">Data Quality</span></div>
+            </div>
+
+            <div class="grid-3" id="kpiQualityGrid" style="margin-bottom: 20px;">
+                <!-- KPIs inyectados aquí -->
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-search-plus"></i> Hallazgos de Limpieza (Warnings)</div>
+                </div>
+                <div class="card-body" id="warningsList">
+                    <!-- Warnings aquí -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-table"></i> Estructura del Archivo</div>
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>Columna</th><th>Tipo de Dato</th><th>Valores Nulos</th></tr></thead>
+                    <tbody id="columnsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        async function loadTransactionsData() {
+            const data = await window.appStorage.getCurrentAnalysis();
+            if(!data) { window.location.href = '/index.html'; return; }
+            document.getElementById('topbar-filename').textContent = data.filename;
+
+            const v = data.validation;
+            
+            // KPIs principales
+            const initialRows = data.rows;
+            const healthScore = Math.max(0, 100 - (v.duplicates/initialRows*100) - ((v.invalid_dates||0)/initialRows*100)).toFixed(0);
+            
+            document.getElementById('kpiQualityGrid').innerHTML = `
+                <div class="kpi-card ${healthScore > 80 ? 'green' : 'amber'}">
+                    <div class="kpi-label">Salud del Dataset</div>
+                    <div class="kpi-value">${healthScore}/100</div>
+                    <div class="kpi-delta ${healthScore > 80 ? 'pos' : 'neu'}">Puntaje General</div>
+                </div>
+                <div class="kpi-card blue">
+                    <div class="kpi-label">Filas Originales</div>
+                    <div class="kpi-value">${initialRows.toLocaleString()}</div>
+                    <div class="kpi-delta neu">Antes de limpieza</div>
+                </div>
+                <div class="kpi-card accent">
+                    <div class="kpi-label">Filas Útiles</div>
+                    <div class="kpi-value">${v.clean_rows.toLocaleString()}</div>
+                    <div class="kpi-delta pos">Listas para analizar</div>
+                </div>
+            `;
+
+            // Advertencias
+            let warningsHTML = '';
+            if (v.duplicates > 0) {
+                warningsHTML += `<div style="padding:12px; border-left: 4px solid var(--amber); background: var(--bg-surface); margin-bottom: 10px; border-radius: 4px;">
+                    <strong style="color:var(--amber)"><i class="fas fa-copy"></i> Duplicados:</strong> Se encontraron y eliminaron <b>${v.duplicates}</b> filas repetidas.
+                </div>`;
+            }
+            if (v.invalid_dates > 0) {
+                warningsHTML += `<div style="padding:12px; border-left: 4px solid var(--red); background: var(--bg-surface); margin-bottom: 10px; border-radius: 4px;">
+                    <strong style="color:var(--red)"><i class="fas fa-calendar-times"></i> Fechas Inválidas:</strong> <b>${v.invalid_dates}</b> transacciones no tenían formato de fecha válido y fueron descartadas.
+                </div>`;
+            }
+            let totalNegatives = 0; if(v.negatives) Object.values(v.negatives).forEach(n => totalNegatives += n);
+            if (totalNegatives > 0) {
+                warningsHTML += `<div style="padding:12px; border-left: 4px solid var(--amber); background: var(--bg-surface); margin-bottom: 10px; border-radius: 4px;">
+                    <strong style="color:var(--amber)"><i class="fas fa-minus-circle"></i> Valores Negativos:</strong> Hay <b>${totalNegatives}</b> valores negativos en ventas o ganancias (posibles devoluciones).
+                </div>`;
+            }
+            let totalOutliers = 0; if(v.outliers) Object.values(v.outliers).forEach(n => totalOutliers += n);
+            if (totalOutliers > 0) {
+                warningsHTML += `<div style="padding:12px; border-left: 4px solid var(--blue); background: var(--bg-surface); margin-bottom: 10px; border-radius: 4px;">
+                    <strong style="color:var(--blue)"><i class="fas fa-chart-bar"></i> Valores Atípicos:</strong> El sistema detectó <b>${totalOutliers}</b> registros financieros inusualmente altos o bajos.
+                </div>`;
+            }
+            if(warningsHTML === '') {
+                warningsHTML = `<div style="color:var(--green); padding:10px;"><i class="fas fa-check-circle"></i> Todo parece estar en perfecto orden. No hay advertencias mayores.</div>`;
+            }
+            document.getElementById('warningsList').innerHTML = warningsHTML;
+
+            // Tabla de Estructura de Columnas
+            if(v.dtypes) {
+                document.getElementById('columnsTableBody').innerHTML = Object.entries(v.dtypes).map(([col, typ]) => {
+                    let humanTyp = 'Texto/Categoría';
+                    if(typ.includes('int') || typ.includes('float')) humanTyp = 'Número (Métrica)';
+                    if(typ.includes('date')) humanTyp = 'Fecha';
+
+                    const nullCount = v.nulls && v.nulls[col] ? v.nulls[col] : 0;
+                    return `
+                        <tr>
+                            <td><b>${col}</b></td>
+                            <td><span class="pill" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border)">${humanTyp}</span></td>
+                            <td style="color:${nullCount > 0 ? 'var(--amber)' : 'var(--green)'}">${nullCount > 0 ? nullCount + ' vacíos' : 'Completo'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('page-content').style.opacity = '1';
+        }
+    </script>
+</body>
+</html>

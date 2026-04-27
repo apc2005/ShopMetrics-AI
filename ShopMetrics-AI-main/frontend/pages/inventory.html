@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — Inventory</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS and Scripts -->
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+</head>
+<body>
+    <main class="main" id="main-content">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('Inventory Analysis', 'Loading data...');
+                loadInventoryData();
+            });
+        </script>
+
+        <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
+            <!-- Content will be injected here if inventory exists -->
+            <div id="inventoryContainer"></div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('nav-badge-inventory');
+            if(el) { el.style.display='inline'; el.textContent='...'; }
+        });
+
+        async function loadInventoryData() {
+            const data = await window.appStorage.getCurrentAnalysis();
+            if(!data) { window.location.href = '/index.html'; return; }
+            document.getElementById('topbar-filename').textContent = data.filename;
+
+            const badge = document.getElementById('nav-badge-inventory');
+            if(badge && data.inventory) {
+                badge.textContent = data.inventory.length;
+                badge.style.display = 'inline';
+            }
+
+            const container = document.getElementById('inventoryContainer');
+            
+            if(!data.inventory || data.inventory.length === 0) {
+                container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="card-icon fas fa-box"></i> Inventory View</div>
+                        <span class="pill blue">0 products</span>
+                    </div>
+                    <div class="card-body">
+                        <p style="color:var(--text-secondary)">No inventory data available in this dataset</p>
+                    </div>
+                </div>`;
+                document.getElementById('page-content').style.opacity = '1';
+                return;
+            }
+
+            container.innerHTML = `
+            <div class="grid-2-1-inv" style="margin-bottom:20px; align-items: stretch;">
+                <div class="card" style="display: flex; flex-direction: column;">
+                    <div class="card-header">
+                        <div class="card-title"><i class="card-icon fas fa-circle-dot"></i> Rendimiento: Ventas vs Margen</div>
+                        <span class="pill blue">Bubble Chart</span>
+                    </div>
+                    <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
+                        <div style="flex: 1; min-height: 480px; position: relative;">
+                            <canvas id="inventoryBubbleChart"></canvas>
+                        </div>
+                        <div style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.7; border: 1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-search-dollar" style="color:var(--blue); margin-right:4px;"></i> <b>Cómo leer la Matriz de Inventario:</b><br><br>
+                            • <b>Eje X (Derecha a Izquierda):</b> El Margen de Ganancia. Las burbujas a la izquierda del cero son productos que generan pérdidas netas cada vez que se venden.<br>
+                            • <b>Eje Y (Arriba a Abajo):</b> Exposición en Ventas. Más arriba significa que ese ítem mueve mucho flujo de efectivo.<br>
+                            • <b>Las Burbujas Críticas 🚨:</b> Fíjate profundamente en los ítems arrinconados en la esquina <b>Superior-Izquierda</b>: Se venden en gran volumen pero roban dinero a la empresa por su margen negativo.
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="card-header">
+                            <div class="card-title"><i class="card-icon fas fa-map"></i> Mapa de Valor</div>
+                            <span class="pill accent">Treemap</span>
+                        </div>
+                        <div class="card-body" style="padding:10px; flex: 1; display: flex; flex-direction: column;">
+                            <div id="treemapChart" style="flex: 1; min-height: 200px;"></div>
+                            
+                            <div style="margin-top:12px; padding:10px; background:var(--bg-surface); border-radius:8px; font-size:11px; color:var(--text-secondary); line-height:1.5;">
+                                <i class="fas fa-map" style="color:var(--accent); margin-right:4px;"></i> <b>Mapa de Jerarquías:</b><br>El tamaño de cada recuadro equivale a su peso en ventas. El gradiente (color de verde a rojo) expone su salud. Busca siempre los rectángulos rojos y grandes para corregir la compra de proveedores.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="card-header">
+                            <div class="card-title"><i class="card-icon fas fa-chart-pie"></i> Estado de Inventario</div>
+                            <span class="pill green">Status</span>
+                        </div>
+                        <div class="card-body" style="padding:10px; flex: 1; display: flex; justify-content: center; align-items: center; position: relative; min-height: 200px;">
+                            <canvas id="inventoryStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="card-icon fas fa-boxes-stacked"></i> Análisis de Inventario</div>
+                    <span class="pill blue">${data.inventory.length} products</span>
+                </div>
+                <table class="data-table" id="invTable">
+                    <thead>
+                        <tr><th>Categoría / Item</th><th>Ventas Totales</th><th>Margen %</th><th>Pedidos</th><th>Status</th><th>Alertas</th></tr>
+                    </thead>
+                    <tbody>
+                        ${data.inventory.map(item => `
+                            <tr>
+                                <td>
+                                    <div style="font-weight:600">${item.product_name}</div>
+                                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">${item.product_category}</div>
+                                </td>
+                                <td class="mono">${fmt(item.total_sales)}</td>
+                                <td class="mono" style="color:${item.margin_pct < 0 ? 'var(--red)' : 'var(--green-light)'}">
+                                    ${item.margin_pct}%
+                                </td>
+                                <td class="mono">${item.order_count}</td>
+                                <td><span class="pill ${invStatusClass(item.status)}">${item.status}</span></td>
+                                <td>${item.is_critical ? '<span class="critical-alert">⚠️ BAJO MARGEN / ALTO VOLUMEN</span>' : '<span style="color:var(--text-muted)">—</span>'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+
+            $('#invTable').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                info: false,
+                language: { paginate: { next: '›', previous: '‹' } }
+            });
+
+            renderInventoryBubble(data.inventory);
+            renderInventoryStatus(data.inventory);
+            renderTreemap(data.inventory);
+
+            document.getElementById('page-content').style.opacity = '1';
+        }
+
+        function renderInventoryBubble(invData) {
+            const ctx = document.getElementById('inventoryBubbleChart');
+            if(!ctx) return;
+            const datasets = {};
+            invData.forEach(item => {
+                const cat = item.product_category || 'Other';
+                if (!datasets[cat]) datasets[cat] = [];
+                datasets[cat].push({
+                    x: Math.min(Math.max(item.margin_pct, -100), 100), 
+                    y: item.total_sales,
+                    r: Math.max(3, Math.min(item.order_count / 10, 20)),
+                    name: item.product_name
+                });
+            });
+
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9'];
+            let cIdx = 0;
+            const chartData = { datasets: [] };
+            for(const [cat, dataPoints] of Object.entries(datasets)) {
+                chartData.datasets.push({
+                    label: cat,
+                    data: dataPoints,
+                    backgroundColor: colors[cIdx % colors.length] + '99',
+                    borderColor: colors[cIdx % colors.length],
+                    borderWidth: 1
+                });
+                cIdx++;
+            }
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'bubble',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Margin (%)', color:'#8b8fa8' }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8fa8' } },
+                        y: { title: { display: true, text: 'Total Sales ($)', color:'#8b8fa8' }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8fa8' } }
+                    },
+                    plugins: { legend: { labels: { color: '#8b8fa8' } }, tooltip: {
+                        callbacks: { label: (ctx) => `${ctx.raw.name}: Sales $${ctx.raw.y.toFixed(0)}, Margin ${ctx.raw.x.toFixed(1)}%` }
+                    } }
+                }
+            });
+        }
+
+        function renderTreemap(invData) {
+            const el = document.getElementById('treemapChart');
+            if(!el || typeof Plotly === 'undefined') return;
+
+            const labels = [];
+            const parents = [];
+            const values = [];
+            const colors = [];
+            let catSums = {};
+
+            invData.forEach(item => {
+                const cat = item.product_category || 'Unknown';
+                if(!catSums[cat]) catSums[cat] = {sales:0, margin:0, count:0};
+                catSums[cat].sales += parseFloat(item.total_sales) || 0;
+                catSums[cat].margin += parseFloat(item.margin_pct) || 0;
+                catSums[cat].count += 1;
+            });
+
+            for(const [cat, data] of Object.entries(catSums)) {
+                labels.push(cat); parents.push('');
+                values.push(data.sales); colors.push(data.margin / data.count);
+            }
+
+            invData.forEach(item => {
+                let pName = item.product_name;
+                if(labels.includes(pName)) pName += ' '; 
+                labels.push(pName); parents.push(item.product_category || 'Unknown');
+                values.push(parseFloat(item.total_sales) || 0); colors.push(parseFloat(item.margin_pct) || 0);
+            });
+
+            const minColor = Math.min(...colors.filter(c => !isNaN(c))) || -20;
+            const maxColor = Math.max(...colors.filter(c => !isNaN(c))) || 20;
+
+            Plotly.newPlot(el, [{
+                type: 'treemap',
+                labels: labels,
+                parents: parents,
+                values: values,
+                marker: { colors: colors, colorscale: 'RdYlGn', showscale: true, cmin: minColor, cmax: maxColor },
+                textinfo: 'label+value',
+                hovertemplate: '<b>%{label}</b><br>Sales: $%{value:,.0f}<br>Margin: %{color:.1f}%<extra></extra>'
+            }], {
+                margin: { t: 0, l: 0, r: 0, b: 0 },
+                paper_bgcolor: 'transparent',
+                font: { color: '#f1f2f6' }
+            }, { responsive: true, displayModeBar: false });
+        }
+
+        function renderInventoryStatus(invData) {
+            const ctx = document.getElementById('inventoryStatusChart');
+            if(!ctx) return;
+            const statusCounts = { Star: 0, Stable: 0, Underperformer: 0 };
+            invData.forEach(i => { if(statusCounts[i.status] !== undefined) statusCounts[i.status]++; else statusCounts['Stable']++; });
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Star', 'Stable', 'Underperformer'],
+                    datasets: [{
+                        data: [statusCounts.Star, statusCounts.Stable, statusCounts.Underperformer],
+                        backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#8b8fa8' } } } }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket BI — History</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+    <style>
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .history-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .history-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .history-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .history-card:hover::before {
+            opacity: 1;
+        }
+        .hc-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .hc-icon {
+            width: 44px; height: 44px;
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-size: 18px;
+        }
+        .hc-title-wrapper {
+            flex: 1; margin-left: 14px;
+        }
+        .hc-filename {
+            font-weight: 700; font-size: 15px; color: var(--text-primary);
+            word-break: break-all;
+        }
+        .hc-date {
+            font-size: 11px; color: var(--text-secondary); margin-top: 4px;
+        }
+        .hc-delete {
+            width: 28px; height: 28px;
+            border-radius: 6px; border: none;
+            background: transparent; color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: grid; place-items: center; font-size: 13px;
+        }
+        .hc-delete:hover {
+            background: var(--red-bg); color: var(--red-light);
+        }
+        .hc-stats {
+            display: flex; gap: 16px; margin-bottom: 16px;
+        }
+        .hc-stat {
+            flex: 1; padding: 12px; background: var(--bg-surface); border-radius: 8px;
+        }
+        .hc-stat-val {
+            font-size: 18px; font-weight: 700; font-family: 'DM Mono', monospace;
+        }
+        .hc-stat-label {
+            font-size: 10px; color: var(--text-secondary); margin-top: 4px;
+        }
+        .hc-action {
+            display: block; width: 100%; text-align: center;
+            padding: 10px; border-radius: 8px;
+            background: rgba(255,255,255,0.03); color: var(--text-secondary);
+            font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .history-card:hover .hc-action {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+        }
+        .empty-history {
+            text-align: center; padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-icon {
+            font-size: 48px; color: var(--text-muted); margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                renderTopbar('Analysis History', 'Past uploads and results');
+                loadHistory();
+            });
+        </script>
+        
+        <div class="content" id="page-content">
+            <div class="section-header">
+                <div class="section-title">Archived Analyses</div>
+                <div class="topbar-actions">
+                    <a href="/index.html">
+                        <button class="btn-primary" style="background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border);">
+                            <i class="fas fa-plus"></i> New Analysis
+                        </button>
+                    </a>
+                </div>
+            </div>
+            
+            <div id="historyContainer" class="history-grid">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return new Intl.DateTimeFormat('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            }).format(date);
+        }
+
+        async function loadHistory() {
+            const container = document.getElementById('historyContainer');
+            try {
+                const history = await window.appStorage.getAllHistory();
+                
+                if (!history || history.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1;" class="empty-history">
+                            <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                            <h3>No history found</h3>
+                            <p style="margin-top: 8px;">You haven't analyzed any datasets yet.</p>
+                            <a href="/index.html" style="text-decoration:none; display:inline-block; margin-top:20px;">
+                                <button class="btn-primary">Upload Dataset</button>
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = history.map(item => `
+                    <div class="history-card" onclick="openAnalysis(${item.id})">
+                        <div class="hc-header">
+                            <div class="hc-icon"><i class="fas fa-file-csv"></i></div>
+                            <div class="hc-title-wrapper">
+                                <div style="display:flex; align-items:center;">
+                                    <div class="hc-filename" title="${item.filename}">${item.filename}</div>
+                                    <button onclick="editAnalysisName(event, ${item.id}, '${item.filename.replace(/'/g, "\\'")}')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; margin-left:8px;" title="Rename">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                                <div class="hc-date"><i class="far fa-clock"></i> ${formatDate(item.date)}</div>
+                            </div>
+                            <button class="hc-delete" onclick="deleteAnalysis(event, ${item.id})" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="hc-stats">
+                            <div class="hc-stat">
+                                <div class="hc-stat-val">${(item.rows || 0).toLocaleString()}</div>
+                                <div class="hc-stat-label">Total Rows</div>
+                            </div>
+                            <div class="hc-stat">
+                                <div class="hc-stat-val" style="color:var(--green)">$${formatShort(item.kpis?.['Ventas Totales'])}</div>
+                                <div class="hc-stat-label">Total Revenue</div>
+                            </div>
+                        </div>
+                        <div class="hc-action">
+                            View Dashboard <i class="fas fa-arrow-right" style="margin-left:6px;font-size:10px;"></i>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color:red">Failed to load history.</p>`;
+            }
+        }
+
+        function formatShort(num) {
+            if (!num) return '0';
+            if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
+            return parseFloat(num).toFixed(0);
+        }
+
+        window.openAnalysis = function(id) {
+            window.appStorage.setCurrentAnalysisId(id);
+            window.location.href = '/pages/overview.html';
+        };
+
+        window.deleteAnalysis = async function(event, id) {
+            event.stopPropagation(); // Avoid triggering card click
+            if(confirm("Are you sure you want to delete this historical record?")) {
+                await window.appStorage.deleteHistory(id);
+                // Si borramos el activo actual, lo limpiamos
+                const currentId = localStorage.getItem('currentAnalysisId');
+                if (currentId == id) {
+                    localStorage.removeItem('currentAnalysisId');
+                }
+                loadHistory(); // Reload grid
+            }
+        };
+
+        window.editAnalysisName = async function(event, id, currentName) {
+            event.stopPropagation();
+            const newName = prompt("Enter a new name for this analysis:", currentName);
+            if (newName !== null && newName.trim() !== "" && newName !== currentName) {
+                try {
+                    await window.appStorage.updateFilename(id, newName.trim());
+                    loadHistory();
+                } catch (err) {
+                    console.error("Error updating name:", err);
+                    alert("Could not update the name.");
+                }
+            }
+        };
+    </script>
+</body>
+</html>

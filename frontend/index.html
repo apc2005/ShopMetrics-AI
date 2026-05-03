@@ -62,7 +62,7 @@
         async function handleFiles(files) {
             if (!files.length) return;
             const file = files[0];
-            if (!file.name.endsWith('.csv')) { alert('Por favor selecciona un archivo CSV'); return; }
+            if (!file.name.endsWith('.csv')) { showToast('Por favor selecciona un archivo CSV válido', 'warning'); return; }
 
             document.getElementById('uploadSection').style.display = 'none';
             document.getElementById('loadingSection').style.display = 'flex';
@@ -85,9 +85,10 @@
                 // Redirect directly to overview
                 window.location.href = '/pages/overview.html';
                 
+                notifService.add('Archivo cargado: ' + file.name, 'upload');
             } catch (error) {
                 console.error(error);
-                alert(`Error: ${error.message}\n\nVerifica que el servidor esté corriendo en http://localhost:5050`);
+                showToast('Error: ' + error.message + ' — Verifica que el servidor esté en http://localhost:5050', 'error', 7000);
                 document.getElementById('uploadSection').style.display = 'flex';
             } finally {
                 document.getElementById('loadingSection').style.display = 'none';

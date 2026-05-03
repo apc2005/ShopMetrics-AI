@@ -17,7 +17,7 @@
     <script src="/js/storage.js"></script>
     <script src="/js/layout.js"></script>
     <style>
-        /* DataTables search + pagination inline fix */
+        /* Estilos para el buscador y la paginación de la tabla */
         div.dataTables_wrapper div.dataTables_filter input,
         div.dataTables_wrapper div.dataTables_filter input[type=search] {
             background: var(--bg-surface) !important;
@@ -165,7 +165,7 @@
             }
             document.getElementById('customersBadgeCount').textContent = data.rfm_segments.length + ' customers';
 
-            // Populate table
+            // Rellenamos la tabla con los datos de los clientes
             document.getElementById('rfmTableBody').innerHTML = data.rfm_segments.map(r => `
                 <tr>
                     <td class="mono">${r.customer_id}</td>
@@ -184,7 +184,7 @@
                 initComplete: function() { applyDTStyles(); }
             });
 
-            // Bubble Chart (Sample data for performance)
+            // Gráfico de burbujas (usamos solo 300 clientes para que no vaya lento)
             const sampleSize = Math.min(data.rfm_segments.length, 300);
             const sampleData = data.rfm_segments.slice(0, sampleSize).map(r => ({
                 x: r.Recency,
@@ -252,7 +252,7 @@
         }
     </script>
     <script>
-        // Forzar estilos DataTable vía JS — compatible con DT 1.x y 2.x
+        // Aplica estilos al buscador y la paginación de la tabla directamente con JS
         function applyDTStyles() {
             var isDark = !document.body.classList.contains('light-mode');
             var bg     = isDark ? '#16181f' : '#f0f1f8';
@@ -264,22 +264,22 @@
             var labelStyle = 'color:'+muted+';font-size:12px;display:inline-flex;align-items:center;gap:4px;';
             var infoStyle  = 'color:'+muted+';font-size:11px;padding:10px 0 16px;';
 
-            // DT 1.x clases
+            // Selectores de la versión antigua de DataTables
             document.querySelectorAll('.dataTables_filter input, .dataTables_filter input[type=search]').forEach(function(el){ el.style.cssText = inputStyle; });
             document.querySelectorAll('.dataTables_length select').forEach(function(el){ el.style.cssText = selectStyle; });
             document.querySelectorAll('.dataTables_filter label, .dataTables_length label').forEach(function(el){ el.style.cssText = labelStyle; });
             document.querySelectorAll('.dataTables_info').forEach(function(el){ el.style.cssText = infoStyle; });
 
-            // DT 2.x clases nuevas
+            // Selectores de la versión nueva de DataTables
             document.querySelectorAll('.dt-search input, .dt-search input[type=search]').forEach(function(el){ el.style.cssText = inputStyle; });
             document.querySelectorAll('.dt-length select').forEach(function(el){ el.style.cssText = selectStyle; });
             document.querySelectorAll('.dt-search label, .dt-length label').forEach(function(el){ el.style.cssText = labelStyle; });
             document.querySelectorAll('.dt-info').forEach(function(el){ el.style.cssText = infoStyle; });
 
-            // Cualquier input dentro del wrapper por si acaso
+            // Por si acaso, también buscamos el input directamente dentro del wrapper
             document.querySelectorAll('.dataTables_wrapper input[type=search], #rfmTable_wrapper input').forEach(function(el){ el.style.cssText = inputStyle; });
 
-            // Padding al wrapper para separar del borde
+            // Añadimos espacio para que los elementos no queden pegados al borde
             document.querySelectorAll('.dataTables_wrapper, #rfmTable_wrapper').forEach(function(el){ el.style.padding = '0 4px'; });
             document.querySelectorAll('.dataTables_wrapper .dataTables_info, .dt-info').forEach(function(el){ el.style.paddingLeft = '4px'; });
             document.querySelectorAll('.dataTables_wrapper .dataTables_paginate, .dt-paging').forEach(function(el){ el.style.paddingRight = '4px'; });

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopMetrics AI — Iniciar sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-base: #0f1117;
+            --bg-card: #1c1f2a;
+            --bg-surface: #16181f;
+            --border: rgba(255,255,255,0.07);
+            --border-accent: rgba(99,102,241,0.4);
+            --text-primary: #f1f2f6;
+            --text-secondary: #8b8fa8;
+            --text-muted: #4f5368;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99,102,241,0.15);
+            --green: #10b981;
+            --red: #ef4444;
+            --red-bg: rgba(239,68,68,0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        /* Fondo con gradiente sutil */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Logo */
+        .auth-brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .auth-brand-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+        }
+        .auth-brand-name {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .auth-brand-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Card */
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        }
+        .auth-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .auth-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
+        /* Campos */
+        .field { margin-bottom: 16px; }
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+        .field-wrap {
+            position: relative;
+        }
+        .field-icon {
+            position: absolute;
+            left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .field-input {
+            width: 100%;
+            padding: 11px 12px 11px 36px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .field-input:focus { border-color: var(--accent); }
+        .field-input::placeholder { color: var(--text-muted); }
+
+        /* Botón principal */
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-auth:hover { background: var(--accent-light); transform: translateY(-1px); }
+        .btn-auth:active { transform: translateY(0); }
+        .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Error */
+        .auth-error {
+            background: var(--red-bg);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #f87171;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .auth-error.show { display: flex; }
+
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .auth-footer a {
+            color: var(--accent-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        /* Spinner */
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Logo -->
+        <div class="auth-brand">
+            <div class="auth-brand-icon">🛒</div>
+            <div class="auth-brand-name">ShopMetrics AI</div>
+            <div class="auth-brand-sub">Analytics Platform</div>
+        </div>
+
+        <!-- Card -->
+        <div class="auth-card">
+            <div class="auth-title">Bienvenido/a de nuevo</div>
+            <div class="auth-sub">Inicia sesión para acceder a tu dashboard</div>
+
+            <div class="auth-error" id="errorMsg">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="field">
+                    <div class="field-label">Email</div>
+                    <div class="field-wrap">
+                        <i class="fas fa-envelope field-icon"></i>
+                        <input class="field-input" type="email" id="email" placeholder="tu@email.com" required autocomplete="email">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-label">Contraseña</div>
+                    <div class="field-wrap">
+                        <i class="fas fa-lock field-icon"></i>
+                        <input class="field-input" type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button class="btn-auth" type="submit" id="submitBtn">
+                    <div class="spinner" id="spinner"></div>
+                    <span id="btnText"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                ¿No tienes cuenta? <a href="/pages/register.html">Regístrate gratis</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Si ya hay sesión activa, redirigir al dashboard
+        const currentUser = localStorage.getItem('sm_user');
+        if (currentUser) {
+            window.location.href = '/index.html';
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn      = document.getElementById('submitBtn');
+            const spinner  = document.getElementById('spinner');
+            const btnText  = document.getElementById('btnText');
+
+            // UI loading
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.style.display = 'none';
+            hideError();
+
+            try {
+                const res = await fetch('http://localhost:5050/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || 'Error al iniciar sesión');
+                    return;
+                }
+
+                // Guardar usuario en localStorage
+                localStorage.setItem('sm_user', JSON.stringify(data));
+                window.location.href = '/index.html';
+
+            } catch (err) {
+                showError('No se puede conectar con el servidor. ¿Está el backend arrancado?');
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.style.display = 'inline';
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            document.getElementById('errorMsg').classList.add('show');
+        }
+        function hideError() {
+            document.getElementById('errorMsg').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

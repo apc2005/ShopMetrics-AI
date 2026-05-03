@@ -242,7 +242,7 @@
     </div>
 
     <script>
-        // Si ya hay sesión activa, redirigir
+        // Si ya tienes sesión, no necesitas registrarte, te mandamos al dashboard
         if (localStorage.getItem('sm_user')) {
             window.location.href = '/index.html';
         }
@@ -313,10 +313,10 @@
                     return;
                 }
 
-                // Guardar usuario y redirigir
+                // Guardamos los datos del usuario en el navegador y redirigimos
                 localStorage.setItem('sm_user', JSON.stringify(data));
 
-                // Mostrar estado de éxito
+                // Ocultamos el formulario y mostramos la pantalla de confirmación
                 document.getElementById('formView').style.display = 'none';
                 document.getElementById('successView').style.display = 'block';
 

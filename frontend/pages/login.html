@@ -248,7 +248,7 @@
     </div>
 
     <script>
-        // Si ya hay sesión activa, redirigir al dashboard
+        // Si ya tienes sesión, te mandamos directamente al dashboard
         const currentUser = localStorage.getItem('sm_user');
         if (currentUser) {
             window.location.href = '/index.html';
@@ -262,7 +262,7 @@
             const spinner  = document.getElementById('spinner');
             const btnText  = document.getElementById('btnText');
 
-            // UI loading
+            // Desactivamos el botón y mostramos el spinner mientras espera
             btn.disabled = true;
             spinner.style.display = 'block';
             btnText.style.display = 'none';

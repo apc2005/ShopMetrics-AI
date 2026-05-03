@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopMetrics AI — Crear cuenta</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-base: #0f1117;
+            --bg-card: #1c1f2a;
+            --bg-surface: #16181f;
+            --border: rgba(255,255,255,0.07);
+            --border-accent: rgba(99,102,241,0.4);
+            --text-primary: #f1f2f6;
+            --text-secondary: #8b8fa8;
+            --text-muted: #4f5368;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99,102,241,0.15);
+            --green: #10b981;
+            --red: #ef4444;
+            --red-bg: rgba(239,68,68,0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 80% 20%, rgba(99,102,241,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(139,92,246,0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .auth-brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .auth-brand-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+        }
+        .auth-brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+        .auth-brand-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        }
+        .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .auth-sub   { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+
+        .field { margin-bottom: 16px; }
+        .field-label {
+            font-size: 11px; font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+        .field-wrap { position: relative; }
+        .field-icon {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted); font-size: 13px; pointer-events: none;
+        }
+        .field-input {
+            width: 100%; padding: 11px 12px 11px 36px;
+            background: var(--bg-surface); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-primary);
+            font-family: inherit; font-size: 13px; outline: none;
+            transition: border-color 0.2s;
+        }
+        .field-input:focus { border-color: var(--accent); }
+        .field-input::placeholder { color: var(--text-muted); }
+
+        /* Indicador fortaleza contraseña */
+        .password-strength { margin-top: 6px; display: none; }
+        .strength-bar {
+            height: 3px; border-radius: 2px;
+            background: var(--bg-surface);
+            overflow: hidden; margin-bottom: 4px;
+        }
+        .strength-fill { height: 100%; border-radius: 2px; transition: all 0.3s; width: 0; }
+        .strength-text { font-size: 10px; color: var(--text-muted); }
+
+        .btn-auth {
+            width: 100%; padding: 12px;
+            background: var(--accent); color: white;
+            border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: all 0.2s; margin-top: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-auth:hover { background: var(--accent-light); transform: translateY(-1px); }
+        .btn-auth:active { transform: translateY(0); }
+        .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .auth-error {
+            background: var(--red-bg); border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px; padding: 10px 14px; font-size: 12px;
+            color: #f87171; margin-bottom: 16px;
+            display: none; align-items: center; gap: 8px;
+        }
+        .auth-error.show { display: flex; }
+
+        /* Terms */
+        .terms {
+            font-size: 11px; color: var(--text-muted);
+            text-align: center; margin-top: 14px; line-height: 1.5;
+        }
+
+        .auth-footer {
+            text-align: center; margin-top: 20px;
+            font-size: 13px; color: var(--text-secondary);
+        }
+        .auth-footer a { color: var(--accent-light); text-decoration: none; font-weight: 600; }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Success state */
+        .auth-success {
+            text-align: center; padding: 20px 0; display: none;
+        }
+        .success-icon {
+            width: 56px; height: 56px;
+            background: rgba(16,185,129,0.15);
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 24px; color: var(--green);
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-brand">
+            <div class="auth-brand-icon">🛒</div>
+            <div class="auth-brand-name">ShopMetrics AI</div>
+            <div class="auth-brand-sub">Analytics Platform</div>
+        </div>
+
+        <div class="auth-card">
+            <div id="formView">
+                <div class="auth-title">Crear Cuenta</div>
+                <div class="auth-sub">Empieza a analizar tu negocio hoy mismo</div>
+
+                <div class="auth-error" id="errorMsg">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText"></span>
+                </div>
+
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="field">
+                        <div class="field-label">Nombre completo</div>
+                        <div class="field-wrap">
+                            <i class="fas fa-user field-icon"></i>
+                            <input class="field-input" type="text" id="name" placeholder="Tu nombre" required autocomplete="name">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Email</div>
+                        <div class="field-wrap">
+                            <i class="fas fa-envelope field-icon"></i>
+                            <input class="field-input" type="email" id="email" placeholder="tu@email.com" required autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Contraseña</div>
+                        <div class="field-wrap">
+                            <i class="fas fa-lock field-icon"></i>
+                            <input class="field-input" type="password" id="password" placeholder="Mínimo 6 caracteres" required autocomplete="new-password" oninput="checkStrength(this.value)">
+                        </div>
+                        <div class="password-strength" id="strengthWrap">
+                            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                            <div class="strength-text" id="strengthText"></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Confirmar contraseña</div>
+                        <div class="field-wrap">
+                            <i class="fas fa-lock field-icon"></i>
+                            <input class="field-input" type="password" id="passwordConfirm" placeholder="Repite la contraseña" required autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <button class="btn-auth" type="submit" id="submitBtn">
+                        <div class="spinner" id="spinner"></div>
+                        <span id="btnText"><i class="fas fa-user-plus"></i> Crear cuenta</span>
+                    </button>
+                </form>
+
+                <div class="terms">Al registrarte aceptas usar esta plataforma de forma responsable 🙂</div>
+
+                <div class="auth-footer">
+                    ¿Ya tienes cuenta? <a href="/pages/login.html">Iniciar sesión</a>
+                </div>
+            </div>
+
+            <!-- Estado de éxito -->
+            <div class="auth-success" id="successView">
+                <div class="success-icon"><i class="fas fa-check"></i></div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:6px;">¡Cuenta creada!</div>
+                <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Redirigiendo al dashboard...</div>
+                <div class="spinner" style="display:block;margin:0 auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Si ya hay sesión activa, redirigir
+        if (localStorage.getItem('sm_user')) {
+            window.location.href = '/index.html';
+        }
+
+        function checkStrength(val) {
+            const wrap = document.getElementById('strengthWrap');
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            if (!val) { wrap.style.display = 'none'; return; }
+            wrap.style.display = 'block';
+
+            let score = 0;
+            if (val.length >= 6)  score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { pct: '20%', color: '#ef4444', label: 'Muy débil' },
+                { pct: '40%', color: '#f59e0b', label: 'Débil' },
+                { pct: '60%', color: '#f59e0b', label: 'Regular' },
+                { pct: '80%', color: '#10b981', label: 'Buena' },
+                { pct: '100%', color: '#10b981', label: '¡Fuerte!' },
+            ];
+            const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+            fill.style.width = lvl.pct;
+            fill.style.background = lvl.color;
+            text.textContent = lvl.label;
+            text.style.color = lvl.color;
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name     = document.getElementById('name').value.trim();
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirm  = document.getElementById('passwordConfirm').value;
+
+            hideError();
+
+            if (password !== confirm) {
+                showError('Las contraseñas no coinciden');
+                return;
+            }
+            if (password.length < 6) {
+                showError('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+
+            const btn     = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.style.display = 'none';
+
+            try {
+                const res = await fetch('http://localhost:5050/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || 'Error al crear la cuenta');
+                    return;
+                }
+
+                // Guardar usuario y redirigir
+                localStorage.setItem('sm_user', JSON.stringify(data));
+
+                // Mostrar estado de éxito
+                document.getElementById('formView').style.display = 'none';
+                document.getElementById('successView').style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = '/index.html';
+                }, 1500);
+
+            } catch (err) {
+                showError('No se puede conectar con el servidor. ¿Está el backend arrancado?');
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.style.display = 'inline';
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            document.getElementById('errorMsg').classList.add('show');
+        }
+        function hideError() {
+            document.getElementById('errorMsg').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

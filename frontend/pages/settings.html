@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopMetrics AI — Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/storage.js"></script>
+    <script src="/js/layout.js"></script>
+</head>
+<body>
+<main class="main" id="main-content">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTopbar('Settings', 'Configuración de cuenta y plataforma');
+            initSettings();
+        });
+    </script>
+
+    <div class="content">
+        <div class="settings-grid">
+
+            <!-- NAV LATERAL -->
+            <div class="settings-nav">
+                <div class="settings-nav-item active" data-section="cuenta" onclick="switchSection('cuenta', this)">
+                    <i class="fas fa-user" style="width:16px;text-align:center;"></i> Cuenta
+                </div>
+                <div class="settings-nav-item" data-section="empresa" onclick="switchSection('empresa', this)">
+                    <i class="fas fa-building" style="width:16px;text-align:center;"></i> Empresa
+                </div>
+                <div class="settings-nav-item" data-section="seguridad" onclick="switchSection('seguridad', this)">
+                    <i class="fas fa-shield-alt" style="width:16px;text-align:center;"></i> Seguridad
+                </div>
+                <div class="settings-nav-item" data-section="notificaciones" onclick="switchSection('notificaciones', this)">
+                    <i class="fas fa-bell" style="width:16px;text-align:center;"></i> Notificaciones
+                </div>
+                <div class="settings-nav-item" data-section="apariencia" onclick="switchSection('apariencia', this)">
+                    <i class="fas fa-palette" style="width:16px;text-align:center;"></i> Apariencia
+                </div>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div id="settings-content">
+
+                <!-- ── CUENTA ── -->
+                <div class="settings-section active" id="section-cuenta">
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-user" style="margin-right:8px;color:var(--accent-light);"></i>Datos Personales</div>
+                        <div class="settings-card-body">
+                            <div class="settings-field">
+                                <div class="settings-label">Nombre completo</div>
+                                <input class="settings-input" type="text" id="s-name" placeholder="Tu nombre">
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Email</div>
+                                <input class="settings-input" type="email" id="s-email" placeholder="tu@email.com">
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Rol / Cargo</div>
+                                <input class="settings-input" type="text" id="s-role" placeholder="Data Analyst">
+                            </div>
+
+                            <button class="btn-save" onclick="saveSection('cuenta')"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar cambios</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-lock" style="margin-right:8px;color:var(--accent-light);"></i>Cambiar Contraseña</div>
+                        <div class="settings-card-body">
+                            <div class="settings-field">
+                                <div class="settings-label">Contraseña actual</div>
+                                <input class="settings-input" type="password" id="s-pass-old" placeholder="••••••••">
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Nueva contraseña</div>
+                                <input class="settings-input" type="password" id="s-pass-new" placeholder="••••••••">
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Confirmar nueva contraseña</div>
+                                <input class="settings-input" type="password" id="s-pass-confirm" placeholder="••••••••">
+                            </div>
+                            <button class="btn-save" onclick="changePassword()"><i class="fas fa-key" style="margin-right:6px;"></i>Cambiar contraseña</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── EMPRESA ── -->
+                <div class="settings-section" id="section-empresa">
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-building" style="margin-right:8px;color:var(--accent-light);"></i>Datos de la Empresa</div>
+                        <div class="settings-card-body">
+                            <div class="settings-field">
+                                <div class="settings-label">Nombre de la empresa</div>
+                                <input class="settings-input" type="text" id="s-company" placeholder="Mi Supermercado S.L.">
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Logo (URL o base64)</div>
+                                <input class="settings-input" type="text" id="s-logo" placeholder="https://...">
+                                <div style="margin-top:8px;" id="logo-preview-wrap" style="display:none;">
+                                    <img id="logo-preview" style="max-height:50px;border-radius:6px;display:none;">
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Zona horaria</div>
+                                <select class="settings-select" id="s-timezone">
+                                    <option value="Europe/Madrid">🇪🇸 Europa/Madrid (CET)</option>
+                                    <option value="Europe/London">🇬🇧 Europa/Londres (GMT)</option>
+                                    <option value="America/New_York">🇺🇸 América/Nueva York (EST)</option>
+                                    <option value="America/Los_Angeles">🇺🇸 América/Los Ángeles (PST)</option>
+                                    <option value="Asia/Tokyo">🇯🇵 Asia/Tokio (JST)</option>
+                                </select>
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Sector de negocio</div>
+                                <select class="settings-select" id="s-sector">
+                                    <option value="retail">Retail / Supermercados</option>
+                                    <option value="ecommerce">E-Commerce</option>
+                                    <option value="hospitality">Hostelería</option>
+                                    <option value="fashion">Moda</option>
+                                    <option value="other">Otro</option>
+                                </select>
+                            </div>
+                            <button class="btn-save" onclick="saveSection('empresa')"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar cambios</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SEGURIDAD ── -->
+                <div class="settings-section" id="section-seguridad">
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-shield-alt" style="margin-right:8px;color:var(--accent-light);"></i>Sesiones Activas</div>
+                        <div class="settings-card-body">
+                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Cierra todas las sesiones abiertas en otros dispositivos. Tu sesión actual permanecerá activa.</p>
+                            <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;">
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <div style="width:36px;height:36px;background:var(--accent-glow);border-radius:8px;display:grid;place-items:center;"><i class="fas fa-laptop" style="color:var(--accent-light);"></i></div>
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;">Este dispositivo</div>
+                                        <div style="font-size:11px;color:var(--text-muted);">Sesión actual · Activo ahora</div>
+                                    </div>
+                                    <span class="pill green" style="margin-left:auto;">Actual</span>
+                                </div>
+                            </div>
+                            <button class="btn-danger" onclick="closeSessions()"><i class="fas fa-sign-out-alt" style="margin-right:6px;"></i>Cerrar todas las otras sesiones</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-history" style="margin-right:8px;color:var(--red);"></i>Zona de peligro</div>
+                        <div class="settings-card-body">
+                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Elimina todos tus datos de análisis guardados localmente. Esta acción no se puede deshacer.</p>
+                            <button class="btn-danger" onclick="clearAllData()"><i class="fas fa-trash" style="margin-right:6px;"></i>Borrar todos los datos locales</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── NOTIFICACIONES ── -->
+                <div class="settings-section" id="section-notificaciones">
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-bell" style="margin-right:8px;color:var(--accent-light);"></i>Preferencias de Notificaciones</div>
+                        <div class="settings-card-body">
+                            <div class="settings-toggle-row">
+                                <div>
+                                    <div class="settings-toggle-label">Subida de archivos</div>
+                                    <div class="settings-toggle-sub">Cuando se suba y analice un CSV correctamente</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-upload" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-toggle-row">
+                                <div>
+                                    <div class="settings-toggle-label">Exportaciones</div>
+                                    <div class="settings-toggle-sub">Cuando se descargue un informe o exportación</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-export" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-toggle-row">
+                                <div>
+                                    <div class="settings-toggle-label">Cambios en el historial</div>
+                                    <div class="settings-toggle-sub">Renombrados y eliminaciones de análisis</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-history" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-toggle-row">
+                                <div>
+                                    <div class="settings-toggle-label">AI Advisor</div>
+                                    <div class="settings-toggle-sub">Cuando el AI Advisor cargue o genere respuestas</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-ai" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-toggle-row">
+                                <div>
+                                    <div class="settings-toggle-label">Alertas del sistema</div>
+                                    <div class="settings-toggle-sub">Errores de conexión y advertencias del servidor</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-system" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div style="margin-top:20px;">
+                                <button class="btn-save" onclick="saveSection('notificaciones')"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar preferencias</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── APARIENCIA ── -->
+                <div class="settings-section" id="section-apariencia">
+                    <div class="settings-card">
+                        <div class="settings-card-header"><i class="fas fa-palette" style="margin-right:8px;color:var(--accent-light);"></i>Tema Visual</div>
+                        <div class="settings-card-body">
+                            <div class="settings-field">
+                                <div class="settings-label">Modo de color</div>
+                                <div style="display:flex;gap:12px;margin-top:8px;">
+                                    <div id="theme-dark" onclick="selectTheme('dark')" style="flex:1;padding:16px;background:var(--bg-surface);border:2px solid var(--accent);border-radius:10px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                        <i class="fas fa-moon" style="font-size:22px;color:var(--accent-light);display:block;margin-bottom:6px;"></i>
+                                        <div style="font-size:12px;font-weight:600;">Oscuro</div>
+                                        <div style="font-size:10px;color:var(--text-muted);">Predeterminado</div>
+                                    </div>
+                                    <div id="theme-light" onclick="selectTheme('light')" style="flex:1;padding:16px;background:var(--bg-surface);border:2px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                        <i class="fas fa-sun" style="font-size:22px;color:var(--amber);display:block;margin-bottom:6px;"></i>
+                                        <div style="font-size:12px;font-weight:600;">Claro</div>
+                                        <div style="font-size:10px;color:var(--text-muted);">Modo claro</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <div class="settings-label">Color principal de la interfaz</div>
+                                <div class="color-swatches">
+                                    <div class="color-swatch selected" style="background:#6366f1;" data-color="#6366f1" onclick="selectColor(this)" title="Indigo (default)"></div>
+                                    <div class="color-swatch" style="background:#10b981;" data-color="#10b981" onclick="selectColor(this)" title="Verde Esmeralda"></div>
+                                    <div class="color-swatch" style="background:#3b82f6;" data-color="#3b82f6" onclick="selectColor(this)" title="Azul"></div>
+                                    <div class="color-swatch" style="background:#f59e0b;" data-color="#f59e0b" onclick="selectColor(this)" title="Ámbar"></div>
+                                    <div class="color-swatch" style="background:#ef4444;" data-color="#ef4444" onclick="selectColor(this)" title="Rojo"></div>
+                                    <div class="color-swatch" style="background:#8b5cf6;" data-color="#8b5cf6" onclick="selectColor(this)" title="Violeta"></div>
+                                    <div class="color-swatch" style="background:#ec4899;" data-color="#ec4899" onclick="selectColor(this)" title="Rosa"></div>
+                                    <div class="color-swatch" style="background:#06b6d4;" data-color="#06b6d4" onclick="selectColor(this)" title="Cyan"></div>
+                                </div>
+                            </div>
+                            <button class="btn-save" onclick="saveSection('apariencia')"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar apariencia</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /settings-content -->
+        </div><!-- /settings-grid -->
+    </div><!-- /content -->
+</main>
+
+<script>
+const SETTINGS_KEY = 'sm_settings';
+
+function initSettings() {
+    const s = getSettings();
+
+    // Aplicar tema guardado
+    const theme = s.theme || 'dark';
+    applyTheme(theme);
+    if (theme === 'light') {
+        document.getElementById('theme-dark').style.borderColor  = 'var(--border)';
+        document.getElementById('theme-light').style.borderColor = 'var(--accent)';
+    }
+
+    // Cuenta
+    if (s.userName)  document.getElementById('s-name').value  = s.userName;
+    if (s.userEmail) document.getElementById('s-email').value = s.userEmail;
+    if (s.userRole)  document.getElementById('s-role').value  = s.userRole;
+    if (s.lang)      document.getElementById('s-lang').value  = s.lang;
+
+    // Empresa
+    if (s.company)  document.getElementById('s-company').value  = s.company;
+    if (s.logo)     { document.getElementById('s-logo').value = s.logo; previewLogo(s.logo); }
+    if (s.timezone) document.getElementById('s-timezone').value = s.timezone;
+    if (s.sector)   document.getElementById('s-sector').value   = s.sector;
+
+    // Notificaciones
+    if (s.notif !== undefined) {
+        document.getElementById('notif-upload').checked  = s.notif.upload  !== false;
+        document.getElementById('notif-export').checked  = s.notif.export  !== false;
+        document.getElementById('notif-history').checked = s.notif.history !== false;
+        document.getElementById('notif-ai').checked      = s.notif.ai      !== false;
+        document.getElementById('notif-system').checked  = s.notif.system  !== false;
+    }
+
+    // Apariencia — color
+    if (s.accentColor) {
+        applyAccentColor(s.accentColor);
+        document.querySelectorAll('.color-swatch').forEach(sw => {
+            sw.classList.toggle('selected', sw.dataset.color === s.accentColor);
+        });
+    }
+
+    // Logo preview on input change
+    document.getElementById('s-logo').addEventListener('input', e => previewLogo(e.target.value));
+}
+
+function getSettings() {
+    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { return {}; }
+}
+
+function saveSettings(partial) {
+    const current = getSettings();
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...current, ...partial }));
+}
+
+function saveSection(section) {
+    if (section === 'cuenta') {
+        saveSettings({
+            userName:  document.getElementById('s-name').value.trim(),
+            userEmail: document.getElementById('s-email').value.trim(),
+            userRole:  document.getElementById('s-role').value.trim(),
+            lang:      document.getElementById('s-lang').value,
+        });
+        // Actualizar sidebar
+        const nameEl = document.getElementById('sidebar-username');
+        const avatarEl = document.getElementById('sidebar-avatar');
+        const name = document.getElementById('s-name').value.trim();
+        if (nameEl && name) {
+            nameEl.textContent = name;
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            if (avatarEl) avatarEl.textContent = initials;
+        }
+    } else if (section === 'empresa') {
+        saveSettings({
+            company:  document.getElementById('s-company').value.trim(),
+            logo:     document.getElementById('s-logo').value.trim(),
+            timezone: document.getElementById('s-timezone').value,
+            sector:   document.getElementById('s-sector').value,
+        });
+    } else if (section === 'notificaciones') {
+        saveSettings({ notif: {
+            upload:  document.getElementById('notif-upload').checked,
+            export:  document.getElementById('notif-export').checked,
+            history: document.getElementById('notif-history').checked,
+            ai:      document.getElementById('notif-ai').checked,
+            system:  document.getElementById('notif-system').checked,
+        }});
+    } else if (section === 'apariencia') {
+        const selected = document.querySelector('.color-swatch.selected');
+        if (selected) saveSettings({ accentColor: selected.dataset.color });
+    }
+    notifService.add('Configuración guardada: ' + section, 'success');
+    showToast('¡Configuración guardada correctamente!', 'success');
+}
+
+function changePassword() {
+    const oldP = document.getElementById('s-pass-old').value;
+    const newP = document.getElementById('s-pass-new').value;
+    const confP = document.getElementById('s-pass-confirm').value;
+    if (!oldP || !newP || !confP) { showToast('Rellena todos los campos de contraseña', 'warning'); return; }
+    if (newP !== confP) { showToast('Las contraseñas no coinciden', 'error'); return; }
+    if (newP.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres', 'warning'); return; }
+    // En producción con login real, esto haría una llamada al backend
+    showToast('Contraseña actualizada correctamente', 'success');
+    document.getElementById('s-pass-old').value = '';
+    document.getElementById('s-pass-new').value = '';
+    document.getElementById('s-pass-confirm').value = '';
+}
+
+function closeSessions() {
+    showToast('Otras sesiones cerradas correctamente', 'success');
+    notifService.add('Sesiones en otros dispositivos cerradas', 'warning');
+}
+
+function clearAllData() {
+    showConfirm('¿Borrar todos los análisis guardados? Esta acción no se puede deshacer.', () => {
+        localStorage.clear();
+        indexedDB.deleteDatabase('SupermarketBI_DB');
+        showToast('Todos los datos locales han sido eliminados', 'info');
+        notifService.add('Datos locales borrados', 'delete');
+    });
+}
+
+function selectTheme(theme) {
+    applyTheme(theme);
+    saveSettings({ theme });
+    const darkEl  = document.getElementById('theme-dark');
+    const lightEl = document.getElementById('theme-light');
+    if (theme === 'dark') {
+        darkEl.style.borderColor  = 'var(--accent)';
+        lightEl.style.borderColor = 'var(--border)';
+    } else {
+        darkEl.style.borderColor  = 'var(--border)';
+        lightEl.style.borderColor = 'var(--accent)';
+    }
+    showToast('Tema ' + (theme === 'dark' ? 'oscuro' : 'claro') + ' aplicado', 'success');
+}
+
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.body.classList.add('light-mode');
+    } else {
+        document.body.classList.remove('light-mode');
+    }
+}
+
+function selectColor(el) {
+    document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.remove('selected'));
+    el.classList.add('selected');
+    applyAccentColor(el.dataset.color);
+}
+
+function applyAccentColor(color) {
+    // Genera variantes del color elegido
+    document.documentElement.style.setProperty('--accent', color);
+    document.documentElement.style.setProperty('--accent-light', color + 'cc');
+    document.documentElement.style.setProperty('--accent-glow', color + '26');
+    document.documentElement.style.setProperty('--border-accent', color + '66');
+}
+
+function previewLogo(url) {
+    const img = document.getElementById('logo-preview');
+    if (url && (url.startsWith('http') || url.startsWith('data:'))) {
+        img.src = url;
+        img.style.display = 'block';
+    } else {
+        img.style.display = 'none';
+    }
+}
+
+function switchSection(name, el) {
+    document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    el.classList.add('active');
+}
+
+function showConfirm(msg, onConfirm) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9998;backdrop-filter:blur(4px);';
+    el.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;max-width:380px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+            <div style="font-size:15px;font-weight:700;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="color:var(--red);margin-right:8px;"></i>¿Estás segura?</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;">${msg}</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;font-family:inherit;">Cancelar</button>
+                <button id="confirm-ok" style="background:var(--red);color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Confirmar</button>
+            </div>
+        </div>`;
+    document.body.appendChild(el);
+    el.querySelector('#confirm-ok').onclick = () => { el.remove(); onConfirm(); };
+}
+</script>
+</body>
+</html>

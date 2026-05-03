@@ -1,8 +1,6 @@
-// frontend/js/layout.js
+// Archivo de funciones compartidas que se cargan en todas las páginas
 
-// ═══════════════════════════════════════════════════════════════════
-// TOAST SYSTEM — reemplaza los alert() feos del navegador
-// ═══════════════════════════════════════════════════════════════════
+// Muestra mensajes emergentes en vez de los alert() del navegador
 function showToast(message, type = 'info', duration = 4000) {
     let container = document.getElementById('sm-toast-container');
     if (!container) {
@@ -36,9 +34,7 @@ function showToast(message, type = 'info', duration = 4000) {
 }
 window.showToast = showToast;
 
-// ═══════════════════════════════════════════════════════════════════
-// NOTIFICATION SERVICE — campanita con historial de actividad
-// ═══════════════════════════════════════════════════════════════════
+// Gestiona las notificaciones de la campanita (guardar, mostrar, borrar)
 const notifService = {
     _key: 'sm_notifications',
 
@@ -114,9 +110,7 @@ const notifService = {
 };
 window.notifService = notifService;
 
-// ═══════════════════════════════════════════════════════════════════
-// EXPORT REPORT — genera y descarga un informe HTML bonito
-// ═══════════════════════════════════════════════════════════════════
+// Genera y descarga un informe HTML con los datos del análisis actual
 async function exportReport() {
     const data = await window.appStorage.getCurrentAnalysis();
     if (!data) {
@@ -161,7 +155,7 @@ async function exportReport() {
         return `<tr><td>${c.product_category || 'N/A'}</td><td>${fmtVal(s)}</td><td style="color:${pr < 0 ? '#ef4444' : '#10b981'}">${fmtVal(pr)}</td></tr>`;
     }).join('');
 
-    // Recomendaciones automáticas
+    // Lista de recomendaciones según los datos del análisis
     const recs = [];
     if (highChurn / totalSeg > 0.3) recs.push('⚠️ <strong>Alta tasa de abandono:</strong> Más del 30% de clientes está en riesgo de churn. Implementa campañas de reactivación urgentes con descuentos personalizados.');
     if ((segCounts['Champions'] || 0) / totalSeg < 0.2) recs.push('📈 <strong>Potencia a tus Champions:</strong> Menos del 20% son clientes top. Crea programas de fidelización exclusivos (acceso anticipado, ofertas VIP) para retenerlos.');
@@ -251,21 +245,19 @@ tr:hover td{background:#fafafa;}
 }
 window.exportReport = exportReport;
 
-// ═══════════════════════════════════════════════════════════════════
-// COLLAPSIBLES — hace desplegables los bloques "Cómo leer"
-// ═══════════════════════════════════════════════════════════════════
+// Convierte los bloques de interpretación en secciones desplegables
 function initCollapsibles() {
     document.querySelectorAll('.insight-box').forEach(box => {
-        // Extraer el título del contenido
+        // Sacamos el título del bloque para usarlo en el botón
         const boldEl = box.querySelector('b');
         const titleText = boldEl ? boldEl.textContent : 'Ver interpretación';
         const icon = box.querySelector('i.fas, i.far');
         const iconHTML = icon ? icon.outerHTML : '<i class="fas fa-info-circle"></i>';
 
-        // Guardar el contenido original
+        // Guardamos el contenido antes de reemplazarlo
         const originalContent = box.innerHTML;
 
-        // Construir estructura colapsable
+        // Montamos el HTML con el botón de expandir/contraer
         box.classList.add('insight-collapsible');
         box.setAttribute('data-open', 'false');
         box.innerHTML = `
@@ -296,9 +288,7 @@ function initCollapsibles() {
     });
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// SIDEBAR
-// ═══════════════════════════════════════════════════════════════════
+// Genera y pinta la barra lateral de navegación
 function renderSidebar() {
     const activePage = window.location.pathname.split('/').pop().split('.')[0] || 'index';
     const isOverview     = activePage === 'overview';
@@ -392,7 +382,7 @@ function renderSidebar() {
     `;
     document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
 
-    // Cargar datos del usuario logueado
+    // Mostramos el nombre e iniciales del usuario que ha iniciado sesión
     try {
         const user = getCurrentUser();
         if (user) {
@@ -400,7 +390,7 @@ function renderSidebar() {
             const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
             document.getElementById('sidebar-avatar').textContent = initials;
         }
-        // Si hay settings extra (rol)
+        // Si el usuario guardó su rol en settings, lo mostramos
         const settings = JSON.parse(localStorage.getItem('sm_settings') || '{}');
         if (settings.userRole) document.getElementById('sidebar-role').textContent = settings.userRole;
     } catch(e) {}
@@ -415,9 +405,7 @@ function toggleUserMenu() {
 }
 window.toggleUserMenu = toggleUserMenu;
 
-// ═══════════════════════════════════════════════════════════════════
-// TOPBAR
-// ═══════════════════════════════════════════════════════════════════
+// Genera y pinta la barra superior con título, campanita y botón de exportar
 function renderTopbar(title, subtitle = '') {
     const topbarHTML = `
         <header class="topbar">
@@ -467,7 +455,7 @@ function renderTopbar(title, subtitle = '') {
     const mainEl = document.querySelector('main.main');
     if (mainEl) mainEl.insertAdjacentHTML('afterbegin', topbarHTML);
 
-    // Lógica del panel de notificaciones
+    // Abre y cierra el panel de notificaciones al hacer clic en la campanita
     const bellBtn = document.getElementById('bell-btn');
     const bellPanel = document.getElementById('bell-panel');
 
@@ -482,18 +470,16 @@ function renderTopbar(title, subtitle = '') {
         }
     });
 
-    // Inicializar badge y panel
+    // Actualizamos el punto rojo y el contenido del panel al cargar
     notifService._updateBadge();
     notifService._renderPanel();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// AUTH GUARD — redirige al login si no hay sesión activa
-// ═══════════════════════════════════════════════════════════════════
+// Comprueba si hay sesión activa y redirige al login si no la hay
 function checkAuth() {
     const publicPages = ['login.html', 'register.html'];
     const currentPage = window.location.pathname.split('/').pop();
-    if (publicPages.includes(currentPage)) return; // páginas públicas, no redirigir
+    if (publicPages.includes(currentPage)) return; // login y register no necesitan sesión
 
     const user = getCurrentUser();
     if (!user) {
@@ -514,16 +500,13 @@ function logout() {
 }
 window.logout = logout;
 
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-// Aplica el tema guardado (oscuro/claro) en cualquier página
+// Aplica el tema guardado (oscuro/claro) al cargar cualquier página
 function applyThemeGlobal() {
     try {
         const s = JSON.parse(localStorage.getItem('sm_settings') || '{}');
         if (s.theme === 'light') document.body.classList.add('light-mode');
         else document.body.classList.remove('light-mode');
-        // Aplicar color de acento si hay uno guardado
+        // Si el usuario eligió un color personalizado, lo aplicamos
         if (s.accentColor) {
             document.documentElement.style.setProperty('--accent', s.accentColor);
             document.documentElement.style.setProperty('--accent-light', s.accentColor + 'cc');
@@ -537,13 +520,10 @@ document.addEventListener('DOMContentLoaded', () => {
     applyThemeGlobal();
     checkAuth();
     if (!document.querySelector('.sidebar')) renderSidebar();
-    // Los collapsibles se inicializan después de que cada página cargue sus datos
-    // Se llama a initCollapsibles() desde cada página tras render
+    // Los bloques desplegables se activan desde cada página después de cargar los datos
 });
 
-// ═══════════════════════════════════════════════════════════════════
-// SHARED HELPERS
-// ═══════════════════════════════════════════════════════════════════
+// Funciones pequeñas de ayuda que se usan en varias páginas
 const SEGMENT_COLORS = {
     'Champions':  '#10b981',
     'Promising':  '#3b82f6',

@@ -18,24 +18,26 @@ from core.utils import _to_json
 app = Flask(__name__)
 CORS(app, origins='*')
 
-# ═══════════════════════════════════════════════════════════════════
-# USUARIOS — sistema de autenticación con JSON
-# ═══════════════════════════════════════════════════════════════════
+# Ruta al archivo donde guardamos los usuarios registrados
 USERS_FILE = os.path.join(os.path.dirname(__file__), 'users.json')
 
+# Lee los usuarios del archivo JSON
 def load_users():
     if not os.path.exists(USERS_FILE):
         return []
     with open(USERS_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+# Guarda la lista de usuarios en el archivo JSON
 def save_users(users):
     with open(USERS_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=2, ensure_ascii=False)
 
+# Convierte la contraseña en un hash para no guardarla en texto plano
 def hash_password(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+# Endpoint para registrar un usuario nuevo
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -74,6 +76,7 @@ def register():
     }), 201
 
 
+# Endpoint para iniciar sesión, comprueba email y contraseña
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()

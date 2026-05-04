@@ -113,17 +113,24 @@
                         <span class="pill accent">Auto</span>
                     </div>
                     <div class="card-body">
-                        <div class="mini-stats" style="margin-bottom:16px">
+<div class="mini-stats" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;height:160px;">
                             <div class="mini-stat">
                                 <div class="mini-stat-val" style="color:var(--red)" id="churnKPIVal">—</div>
                                 <div class="mini-stat-label">Churn Rate</div>
                             </div>
                             <div class="mini-stat">
-                                <div class="mini-stat-val" style="color:var(--green)" id="segmentsNumVal">0</div>
-                                <div class="mini-stat-label">Segmentos</div>
+                                <div class="mini-stat-val" style="color:var(--green)" id="segmentsNumVal">4</div>
+                                <div class="mini-stat-label">RFM Groups</div>
                             </div>
+                            <div class="mini-stat">
+                                <div class="mini-stat-val" style="color:var(--blue)" id="churnProbVal">—%</div>
+                                <div class="mini-stat-label">Avg Churn Prob</div>
+                            </div>
+    <div class="mini-stat">
+        <div class="mini-stat-val" style="color:var(--accent)" id="topCatVal">—</div>
+        <div class="mini-stat-label">Top Categoría</div>
+    </div>
                         </div>
-                        <div id="insightsContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
                     </div>
                 </div>
             </div>
@@ -171,23 +178,23 @@
             const churnRate = totalSeg > 0 ? (highChurnCount / totalSeg) : 0;
             document.getElementById('churnKPIVal').textContent = (churnRate * 100).toFixed(1) + '%';
             document.getElementById('segmentsNumVal').textContent = Object.keys(segCounts).length.toString();
+            const avgChurn = data.rfm_segments.reduce((sum, r) => sum + parseFloat(r.Churn_Probability || 0), 0) / (data.rfm_segments.length || 1);
+            document.getElementById('churnProbVal').textContent = avgChurn.toFixed(1) + '%';
+            document.getElementById('topCatVal').textContent = data.categories?.[0]?.product_category || 'N/A';
 
             // Insights estratégicos automáticos
-            const insights = [];
-            if (churnRate > 0.3) insights.push({ icon: 'fa-exclamation-triangle', color: 'var(--red)', text: '<b>Alta tasa de churn:</b> Más del 30% de clientes en riesgo. Activa campañas de reactivación urgentes.' });
-            else if (churnRate > 0.15) insights.push({ icon: 'fa-exclamation-circle', color: 'var(--amber)', text: '<b>Churn moderado:</b> ' + (churnRate*100).toFixed(0) + '% de clientes con riesgo. Monitorea de cerca el segmento "At Risk".' });
-            else insights.push({ icon: 'fa-check-circle', color: 'var(--green)', text: '<b>Churn bajo:</b> Buena retención. Sigue reforzando la fidelización de Champions.' });
+            // Insights nuevos, abajo del todo, sin repetir datos (% ya arriba)
+            const insights = [
+                { icon: 'fa-users', color: 'var(--accent)', text: `<b>${totalSeg.toLocaleString()}</b> clientes únicos analizados` },
+                { icon: 'fa-shopping-cart', color: 'var(--blue)', text: `Top segmento: <b>${Object.entries(segCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A'}</b> (${Object.entries(segCounts).sort((a,b)=>b[1]-a[1])[0]?.[1] || 0} clientes)` },
+                { icon: 'fa-chart-line-up', color: 'var(--green)', text: `Próximo mes ventas: <b>$${fmt(data.forecast.data.slice(-1)[0]?.yhat || 0)}</b>` },
+                { icon: 'fa-exclamation-circle', color: 'var(--amber)', text: `<b>Churn moderado:</b> ${churnRate*100|0}% riesgo. Monitorea "At Risk". Prioriza reactivación.` }
+            ];
 
-            if ((segCounts['Champions'] || 0) / totalSeg < 0.15) insights.push({ icon: 'fa-star', color: 'var(--amber)', text: '<b>Pocos Champions:</b> Menos del 15% son clientes top. Invierte en programas de fidelización.' });
-            if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) insights.push({ icon: 'fa-moon', color: 'var(--blue)', text: '<b>Clientes dormidos:</b> El 25%+ está en Hibernating. Diseña una oferta de win-back.' });
-            if ((segCounts['Promising'] || 0) / totalSeg > 0.3) insights.push({ icon: 'fa-seedling', color: 'var(--green)', text: '<b>Gran base Promising:</b> Buen momento para convertirlos en Champions con cross-selling.' });
+            if ((segCounts['Champions'] || 0) / totalSeg < 0.15) insights.push({ icon: 'fa-star', color: 'var(--amber)', text: '<b>Pocos Champions:</b> Menos del 15% top. Fidelización urgente.' });
+            if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) insights.push({ icon: 'fa-moon', color: 'var(--blue)', text: '<b>Dormidos alta:</b> 25%+ Hibernating. Win-back offers.' });
 
-            document.getElementById('insightsContainer').innerHTML = insights.map(ins => `
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg-surface);border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--text-secondary);line-height:1.5;">
-                    <i class="fas ${ins.icon}" style="color:${ins.color};font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-                    <span>${ins.text}</span>
-                </div>
-            `).join('');
+
 
             // Churn table
             document.getElementById('churnTableBody').innerHTML = data.top_churn_risk.map(r => {
@@ -256,13 +263,31 @@
                         {
                             label: 'Forecast', data: futData,
                             borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)',
-                            fill: true, tension: 0.4, borderDash: [6, 4], pointRadius: 3, borderWidth: 2
+                            fill: true, tension: 0.4, borderDash: [6, 4], pointRadius: 4, borderWidth: 2,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: '#6366f1'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    interaction: { mode: 'index', intersect: false },
+                    interaction: { 
+                        mode: 'nearest', 
+                        intersect: false,
+                        axis: 'x'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label || 'Predicción';
+                                },
+                                label: function(context) {
+                                    return `Ventas predichas: $${fmt(context.parsed.y)}`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         x: { type: 'time', time: { unit: 'month' }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8fa8' } },
                         y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b8fa8' } }

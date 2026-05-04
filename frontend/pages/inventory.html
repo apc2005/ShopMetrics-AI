@@ -79,7 +79,7 @@
                         <div style="flex: 1; min-height: 480px; position: relative;">
                             <canvas id="inventoryBubbleChart"></canvas>
                         </div>
-                        <div style="margin-top:16px; padding:12px; background:var(--bg-surface); border-radius:8px; font-size:12px; color:var(--text-secondary); line-height:1.7; border: 1px dashed rgba(255,255,255,0.1);">
+                        <div class="insight-box insight-toggle">
                             <i class="fas fa-search-dollar" style="color:var(--blue); margin-right:4px;"></i> <b>Cómo leer la Matriz de Inventario:</b><br><br>
                             • <b>Eje X (Derecha a Izquierda):</b> El Margen de Ganancia. Las burbujas a la izquierda del cero son productos que generan pérdidas netas cada vez que se venden.<br>
                             • <b>Eje Y (Arriba a Abajo):</b> Exposición en Ventas. Más arriba significa que ese ítem mueve mucho flujo de efectivo.<br>
@@ -96,7 +96,7 @@
                         <div class="card-body" style="padding:10px; flex: 1; display: flex; flex-direction: column;">
                             <div id="treemapChart" style="flex: 1; min-height: 200px;"></div>
                             
-                            <div style="margin-top:12px; padding:10px; background:var(--bg-surface); border-radius:8px; font-size:11px; color:var(--text-secondary); line-height:1.5;">
+                            <div class="insight-box insight-toggle">
                                 <i class="fas fa-map" style="color:var(--accent); margin-right:4px;"></i> <b>Mapa de Jerarquías:</b><br>El tamaño de cada recuadro equivale a su peso en ventas. El gradiente (color de verde a rojo) expone su salud. Busca siempre los rectángulos rojos y grandes para corregir la compra de proveedores.
                             </div>
                         </div>
@@ -249,6 +249,19 @@
                 paper_bgcolor: 'transparent',
                 font: { color: '#f1f2f6' }
             }, { responsive: true, displayModeBar: false });
+            
+            // Collapsible functionality for insights
+            document.querySelectorAll('.toggle-insight').forEach(icon => {
+                icon.style.transform = 'rotate(0deg)';
+                icon.onclick = function() {
+                    const content = this.previousElementSibling;
+                    const isHidden = content.style.maxHeight === '0px' || content.style.maxHeight === '';
+                    content.style.maxHeight = isHidden ? '200px' : '0px';
+                    content.style.overflow = 'hidden';
+                    content.style.transition = 'max-height 0.3s ease';
+                    this.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+                };
+            });
         }
 
         function renderInventoryStatus(invData) {

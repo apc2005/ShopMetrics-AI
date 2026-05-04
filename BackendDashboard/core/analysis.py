@@ -166,6 +166,12 @@ def data_engineering_pipeline(df):
         }
     )
 
+    # Force numeric types to fix log1p dtype error
+    numeric_cols = ['Recency', 'Frequency', 'Monetary']
+    for col in numeric_cols:
+        if col in rfm.columns:
+            rfm[col] = pd.to_numeric(rfm[col], errors='coerce').fillna(0)
+
     rfm['Recency_log']   = np.log1p(rfm['Recency'])
     rfm['Frequency_log'] = np.log1p(rfm['Frequency'])
     rfm['Monetary_log']  = np.log1p(rfm['Monetary'])

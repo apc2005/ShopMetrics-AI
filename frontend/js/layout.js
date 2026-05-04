@@ -157,11 +157,11 @@ async function exportReport() {
 
     // Lista de recomendaciones según los datos del análisis
     const recs = [];
-    if (highChurn / totalSeg > 0.3) recs.push('⚠️ <strong>Alta tasa de abandono:</strong> Más del 30% de clientes está en riesgo de churn. Implementa campañas de reactivación urgentes con descuentos personalizados.');
-    if ((segCounts['Champions'] || 0) / totalSeg < 0.2) recs.push('📈 <strong>Potencia a tus Champions:</strong> Menos del 20% son clientes top. Crea programas de fidelización exclusivos (acceso anticipado, ofertas VIP) para retenerlos.');
-    if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) recs.push('💤 <strong>Clientes dormidos:</strong> El segmento Hibernating supera el 25%. Lanza una campaña de win-back con incentivos atractivos antes de perderlos definitivamente.');
-    if ((segCounts['At Risk'] || 0) / totalSeg > 0.2) recs.push('🚨 <strong>Riesgo medio elevado:</strong> El segmento "At Risk" supera el 20%. Actúa rápido con descuentos personalizados antes de que migren a Hibernating.');
-    if ((segCounts['Promising'] || 0) / totalSeg > 0.3) recs.push('🌱 <strong>Nurturing de Promising:</strong> Tienes una base sólida de clientes "Promising". Aumenta su frecuencia de compra con cross-selling y bundles estratégicos.');
+    if (highChurn / totalSeg > 0.3) recs.push('<strong>Alta tasa de abandono:</strong> Más del 30% de clientes está en riesgo de churn. Implementa campañas de reactivación urgentes con descuentos personalizados.');
+    if ((segCounts['Champions'] || 0) / totalSeg < 0.2) recs.push('<strong>Potencia a tus Champions:</strong> Menos del 20% son clientes top. Crea programas de fidelización exclusivos (acceso anticipado, ofertas VIP) para retenerlos.');
+    if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) recs.push('<strong>Clientes dormidos:</strong> El segmento Hibernating supera el 25%. Lanza una campaña de win-back con incentivos atractivos antes de perderlos definitivamente.');
+    if ((segCounts['At Risk'] || 0) / totalSeg > 0.2) recs.push('<strong>Riesgo medio elevado:</strong> El segmento "At Risk" supera el 20%. Actúa rápido con descuentos personalizados antes de que migren a Hibernating.');
+    if ((segCounts['Promising'] || 0) / totalSeg > 0.3) recs.push('<strong>Nurturing de Promising:</strong> Tienes una base sólida de clientes "Promising". Aumenta su frecuencia de compra con cross-selling y bundles estratégicos.');
     recs.push('📊 <strong>Monitoreo continuo:</strong> Analiza la evolución RFM mensualmente para detectar cambios de comportamiento temprano y ajustar estrategias.');
     recs.push('🤖 <strong>AI Advisor:</strong> Usa el módulo AI Advisor de la plataforma para recomendaciones específicas y personalizadas basadas en tu dataset.');
 
@@ -414,10 +414,6 @@ function renderTopbar(title, subtitle = '') {
                 <span class="topbar-sub" id="topbar-filename">${subtitle}</span>
             </div>
             <div class="topbar-actions">
-                <div class="search-bar">
-                    <i class="fas fa-search" style="font-size:11px;color:var(--text-muted)"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
 
                 <!-- CAMPANITA -->
                 <div class="icon-btn bell-btn" id="bell-btn" title="Notificaciones">

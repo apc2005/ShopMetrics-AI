@@ -43,6 +43,13 @@ def train_segmentation(rfm_df):
     print(f'[Segmentación] Entrenando KMeans (k={N_CLUSTERS})…')
     features = [f for f in RFM_LOG_FEATURES if f in rfm_df.columns]
     X = rfm_df[features].fillna(0)
+    
+    if len(X) == 0:
+        print('ERROR: No hay datos suficientes para segmentación (0 clientes). Retornando DF vacío.')
+        rfm_df['Segment_Cluster'] = 0
+        rfm_df['Segment_Label'] = 'No Data'
+        rfm_df['Silhouette_Score'] = 0.0
+        return rfm_df
 
     scaler   = StandardScaler()
     X_scaled = scaler.fit_transform(X)

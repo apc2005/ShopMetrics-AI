@@ -133,16 +133,14 @@ def universal_cleaner(df):
     # 1. Limpieza de Fechas
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-    # 2. Limpieza de Números y manejo de Nulos Críticos
+    # 2. Limpieza de Números y manejo de Nulos Críticos - Ensure numeric for downstream agg
     for col in ['total_sales', 'profit']:
-        if df[col].dtype == 'object':
-            df[col] = df[col].astype(str).str.replace(r'[^\d.]', '', regex=True)
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-
-        # En lugar de fillna(0), usamos la mediana para no sesgar hacia abajo
-        # o eliminamos si la venta es nula (dato no confiable)
-        median_val = df[col].median()
-        df[col] = df[col].fillna(median_val)
+        if col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].astype(str).str.replace(r'[^\d.]', '', regex=True)
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            median_val = df[col].median()
+            df[col] = df[col].fillna(median_val).astype(float)  # Explicit float dtype
 
     # 3. Encoding de Categorías (One-Hot Encoding)
     # Creamos variables dummies para que el modelo entienda qué categorías compra cada cliente

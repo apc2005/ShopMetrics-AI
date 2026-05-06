@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopMetrics AI — Settings</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
@@ -344,12 +345,15 @@ function saveSection(section) {
         // Actualizar sidebar safely
         const sidebarName = document.getElementById('sidebar-username');
         const sidebarAvatar = document.getElementById('sidebar-avatar');
+        const sidebarRole = document.getElementById('sidebar-role');
         const name = nameEl.value.trim();
         if (sidebarName && name) {
             sidebarName.textContent = name;
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             if (sidebarAvatar) sidebarAvatar.textContent = initials;
         }
+        const role = roleEl.value.trim();
+        if (sidebarRole && role) sidebarRole.textContent = role;
     } else if (section === 'empresa') {
         saveSettings({
             company:  document.getElementById('s-company').value.trim(),

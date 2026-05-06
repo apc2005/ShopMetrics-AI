@@ -123,10 +123,6 @@ def data_validation(df):
 
     return result
 
-
-import pandas as pd
-import io
-
 def load_and_standardize(uploaded_file):
     df = pd.read_csv(io.BytesIO(uploaded_file), encoding='latin-1')
 

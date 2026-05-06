@@ -18,6 +18,7 @@ from config import RFM_LOG_FEATURES, N_CLUSTERS, RANDOM_STATE, CHURN_TEST_SIZE, 
 from prophet import Prophet
 
 
+
 def _auto_label_clusters(rfm_df, labels):
     tmp = rfm_df.copy()
     tmp['_lbl'] = labels
@@ -32,6 +33,7 @@ def _auto_label_clusters(rfm_df, labels):
     return {cluster_id: business_labels[rank - 1] for cluster_id, rank in ranked.items()}
 
 
+
 def _save_model(obj, filename: str):
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     path = MODEL_DIR / filename
@@ -39,10 +41,54 @@ def _save_model(obj, filename: str):
     print(f"Modelo guardado en: {path}")
 
 
+
+def _select_k_kmeans(X_scaled, k_min: int = 2, k_max_cap: int = 10, random_state: int = 42, n_init: int = 20):
+    """Selecciona k para KMeans usando silhouette_score.
+
+    - K objetivo: k in [k_min..k_max] donde k_max = min(k_max_cap, n_samples-1)
+    - Fallback: si silhouette no es calculable, devuelve k_min.
+    """
+    n_samples = X_scaled.shape[0]
+    k_max = min(k_max_cap, max(k_min, n_samples - 1))
+
+    if n_samples < 3 or k_max < k_min:
+        return {
+            'k': 1 if n_samples >= 1 else k_min,
+            'silhouette': 0.0,
+            'method': 'insufficient_data'
+        }
+
+    best = {'k': k_min, 'silhouette': -1.0, 'method': 'silhouette'}
+
+    for k in range(k_min, k_max + 1):
+        try:
+            kmeans = KMeans(n_clusters=k, n_init=n_init, random_state=random_state)
+            labels = kmeans.fit_predict(X_scaled)
+
+            # silhouette requiere al menos 2 clusters presentes
+            if len(set(labels)) < 2:
+                continue
+
+
+            sil = silhouette_score(X_scaled, labels)
+            if sil > best['silhouette']:
+                best = {'k': k, 'silhouette': float(sil), 'method': 'silhouette'}
+        except Exception:
+            # seguimos probando otros k
+            continue
+
+    # Si por cualquier motivo no hubo mejoría (best['silhouette'] sigue en -1), forzamos fallback.
+    if best['silhouette'] < 0:
+        return {'k': k_min, 'silhouette': 0.0, 'method': 'silhouette_failed_fallback'}
+
+    return best
+
+
+
 def train_segmentation(rfm_df):
-    print(f'[Segmentación] Entrenando KMeans (k={N_CLUSTERS})…')
     features = [f for f in RFM_LOG_FEATURES if f in rfm_df.columns]
     X = rfm_df[features].fillna(0)
+
     
     if len(X) == 0:
         print('ERROR: No hay datos suficientes para segmentación (0 clientes). Retornando DF vacío.')
@@ -54,16 +100,29 @@ def train_segmentation(rfm_df):
     scaler   = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    kmeans = KMeans(n_clusters=N_CLUSTERS, n_init=20, random_state=RANDOM_STATE)
+    # Selección dinámica de k con silhouette (fallback a k_min)
+    k_select = _select_k_kmeans(X_scaled, k_min=2, k_max_cap=10, random_state=RANDOM_STATE, n_init=20)
+
+    k_selected = int(k_select.get('k', N_CLUSTERS))
+    sil_best   = float(k_select.get('silhouette', 0.0))
+    method_sel = str(k_select.get('method', 'silhouette'))
+
+    print(f"[Segmentación] K seleccionado automáticamente: k={k_selected} (method={method_sel}, silhouette={sil_best:.4f})")
+
+    kmeans = KMeans(n_clusters=k_selected, n_init=20, random_state=RANDOM_STATE)
     labels = kmeans.fit_predict(X_scaled)
 
-    sil = silhouette_score(X_scaled, labels)
-    print(f'  Silhouette Score: {sil:.4f}')
+    # Guardamos el silhouette del mejor k (evita recalcular)
+    sil = sil_best
+
 
     rfm_df = rfm_df.copy()
     rfm_df['Segment_Cluster'] = labels
     rfm_df['Segment_Label']   = rfm_df['Segment_Cluster'].map(_auto_label_clusters(rfm_df, labels))
     rfm_df['Silhouette_Score'] = sil
+    rfm_df['Chosen_K'] = k_selected
+    rfm_df['Clustering_Method'] = method_sel
+
 
     _save_model({'kmeans': kmeans, 'scaler': scaler}, 'segmentation_model.pkl')
 

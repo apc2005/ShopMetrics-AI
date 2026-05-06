@@ -1,7 +1,8 @@
 import requests
 import pandas as pd
 
-with open('supermarket.csv', 'rb') as f:
+with open('SuperMarket Analysis.csv', 'rb') as f:
+
     files = {'file': f}
     response = requests.post('http://localhost:5050/analyze', files=files)
 

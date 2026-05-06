@@ -6,7 +6,61 @@ preprocessing.py — Carga, validación y limpieza de datos
 import pandas as pd
 import numpy as np
 import io
+import json
+import ollama
+from config import STANDARD_COLUMNS
 
+
+def llm_map_columns(headers, sample_rows, max_retries=2):
+    """Usa un LLM para mapear columnas de un CSV a un esquema estándar usando similitud semántica y de datos."""
+    prompt = f"""
+Analiza los encabezados del CSV y los datos de ejemplo.
+
+Tu tarea es mapear columnas del CSV a este esquema estándar, incluso si los nombres NO coinciden exactamente.
+Debes basarte en:
+1. Similitud semántica (sinónimos, abreviaciones, idiomas)
+2. Patrones en los datos (fechas, números, IDs, texto categórico, etc.)
+
+COLUMNAS ESTÁNDAR:
+- customer_id: identificador único del cliente (ej: id, client_id, user, cust_no)
+- date: fecha (ej: order_date, fecha, timestamp)
+- total_sales: importe total (ej: revenue, sales, amount, total)
+- product_category: categoría (ej: category, type, family)
+- product_name: nombre del producto (ej: product, item, description)
+- region: ubicación (ej: city, country, region, location)
+- profit: beneficio (ej: profit, margin, gain)
+
+Reglas:
+- Puedes asignar aunque el nombre sea diferente si el significado o los datos coinciden.
+- Usa los datos de ejemplo para confirmar (fechas, números, textos).
+- Si no estás razonablemente seguro, usa null.
+- No inventes columnas.
+
+CSV HEADERS: {headers}
+SAMPLE DATA: {sample_rows}
+
+Responde SOLO con JSON válido en este formato:
+{{"customer_id": "columna_csv", "date": null, ...}}
+"""
+    
+    try:
+        response = ollama.chat(
+            model='llama3.1:8b', 
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+        mapping_str = response['message']['content'].strip()
+        
+        # Clean markdown code blocks
+        if '```json' in mapping_str:
+            mapping_str = mapping_str.split('```json')[1].split('```')[0]
+        elif '```' in mapping_str:
+            mapping_str = mapping_str.split('```')[1]
+            
+        mapping = json.loads(mapping_str)
+        return {k: v for k, v in mapping.items() if v and v != 'null'}
+    except Exception as e:
+        print(f"LLM mapping failed: {e}")
+        return {}
 
 def data_validation(df):
     print("VALIDACIÓN DE CALIDAD DE DATOS")
@@ -69,10 +123,6 @@ def data_validation(df):
 
     return result
 
-
-import pandas as pd
-import io
-
 def load_and_standardize(uploaded_file):
     df = pd.read_csv(io.BytesIO(uploaded_file), encoding='latin-1')
 
@@ -80,45 +130,55 @@ def load_and_standardize(uploaded_file):
     df = df.loc[:, ~df.columns.duplicated()].copy()
 
     # Normalizar nombres: minúsculas, quitar espacios y reemplazar ESPACIOS Y GUIONES por '_'
-    # (El archivo original tiene "Sub-Category", esto previene fallos)
     df.columns = [c.lower().strip().replace(' ', '_').replace('-', '_') for c in df.columns]
     print(f"Columnas detectadas: {list(df.columns)}")
 
-    # Sinónimos actualizados (todo con guiones bajos)
-    synonyms = {
-        'customer_id': ['customer_id', 'id_cliente', 'userid', 'client', 'customer_name'],
-        'date': ['order_date', 'fecha', 'timestamp', 'date'],
-        'total_sales': ['sales', 'ventas', 'amount', 'ingresos', 'total'],
-        'product_category': ['category', 'categoria', 'product_category', 'clase', 'familia'],
-        'product_name': ['product_name', 'product', 'item', 'sub_category', 'sub_categoria', 'nombre_producto'],
-        'region': ['region', 'ciudad', 'city', 'country', 'state'],
-        'profit': ['profit', 'beneficio', 'gain', 'margin']
-    }
-
-    # Crear dataframe estándar vacío
+    # LLM Column Mapping (NEW - Replaces hardcoded synonyms)
+    headers = list(df.columns)
+    sample_df = df.head(3)
+    sample_rows = sample_df.to_csv(index=False, header=False) if not sample_df.empty else ""
+    
+    col_mapping = llm_map_columns(headers, sample_rows)
+    print(f"LLM Mapping: {col_mapping}")
+    
+    # Fallback if LLM insufficient
+    if len([v for v in col_mapping.values() if v]) < 3:
+        print("LLM insufficient, using traditional synonyms.")
+        synonyms = {
+            'customer_id': ['customer_id', 'id_cliente', 'userid', 'client', 'customer_name'],
+            'date': ['order_date', 'fecha', 'timestamp', 'date'],
+            'total_sales': ['sales', 'ventas', 'amount', 'ingresos', 'total'],
+            'product_category': ['category', 'categoria', 'product_category', 'clase', 'familia'],
+            'product_name': ['product_name', 'product', 'item', 'sub_category', 'sub_categoria', 'nombre_producto'],
+            'region': ['region', 'ciudad', 'city', 'country', 'state'],
+            'profit': ['profit', 'beneficio', 'gain', 'margin']
+        }
+        for std_col, syns in synonyms.items():
+            matched = [col for col in df.columns if any(syn in col for syn in syns)]
+            if matched:
+                col_mapping[std_col] = matched[0]
+    
+    # Build df_std with LLM/dynamic mapping
     df_std = pd.DataFrame()
-
-    # Mapear columnas de forma SEGURA
-    for std_col, syns in synonyms.items():
-        matched_cols = [col for col in df.columns if col in syns]
-
-        if matched_cols:
+    for std_col, csv_col in col_mapping.items():
+        if csv_col in df.columns:
             if std_col in ['total_sales', 'profit']:
-                df_std[std_col] = df[matched_cols].apply(pd.to_numeric, errors='coerce').sum(axis=1)
+                df_std[std_col] = pd.to_numeric(df[csv_col], errors='coerce')
             else:
-                df_std[std_col] = df[matched_cols[0]]
-        else:
-            print(f"Columna '{std_col}' no encontrada.")
-
+                df_std[std_col] = df[csv_col]
+    
+    # Fill missing standard columns
+    for std_col in STANDARD_COLUMNS:
+        if std_col not in df_std.columns:
+            print(f"Filling missing '{std_col}'")
             if std_col == 'profit' and 'total_sales' in df_std.columns:
-                print("--> Simulando 'profit' como un margen del 15% de las ventas.")
                 df_std[std_col] = df_std['total_sales'] * 0.15
             elif std_col in ['total_sales', 'profit']:
-                df_std[std_col] = 0
+                df_std[std_col] = 0.0
             elif std_col == 'date':
                 df_std[std_col] = pd.NaT
             else:
-                df_std[std_col] = None
+                df_std[std_col] = np.nan
 
     if 'date' in df_std.columns and not df_std['date'].isnull().all():
         df_std['date'] = pd.to_datetime(df_std['date'], dayfirst=True, errors='coerce')
@@ -133,16 +193,14 @@ def universal_cleaner(df):
     # 1. Limpieza de Fechas
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-    # 2. Limpieza de Números y manejo de Nulos Críticos
+    # 2. Limpieza de Números y manejo de Nulos Críticos - Ensure numeric for downstream agg
     for col in ['total_sales', 'profit']:
-        if df[col].dtype == 'object':
-            df[col] = df[col].astype(str).str.replace(r'[^\d.]', '', regex=True)
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-
-        # En lugar de fillna(0), usamos la mediana para no sesgar hacia abajo
-        # o eliminamos si la venta es nula (dato no confiable)
-        median_val = df[col].median()
-        df[col] = df[col].fillna(median_val)
+        if col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].astype(str).str.replace(r'[^\d.]', '', regex=True)
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            median_val = df[col].median()
+            df[col] = df[col].fillna(median_val).astype(float)  # Explicit float dtype
 
     # 3. Encoding de Categorías (One-Hot Encoding)
     # Creamos variables dummies para que el modelo entienda qué categorías compra cada cliente

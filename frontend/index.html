@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/index.css">
     <script src="/js/storage.js"></script>
     <script src="/js/layout.js"></script>
 </head>
@@ -27,7 +28,7 @@
                 <div class="upload-card" id="uploadArea">
                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                     <h2>Import your dataset</h2>
-                    <p>Drag & drop a CSV file here, or click below to select<br>Format: customer_id, date, total_sales…</p>
+                    <p><strong>Archivo CSV requerido</strong> (solo .csv)<br>Columnas mínimas: customer_id, date, total_sales<br>Drag & drop aquí o haz clic abajo</p>
                     <label for="csvFile2" class="btn-upload">
                         <i class="fas fa-folder-open"></i> Select CSV file
                     </label>
@@ -37,11 +38,28 @@
             </div>
 
             <!-- LOADING -->
-            <div id="loadingSection">
-                <div class="spinner-ring"></div>
-                <div class="loading-text">Analyzing with AI…</div>
-                <div class="loading-sub">RFM Segmentation → Churn Model → Sales Forecast → Inventory</div>
-            </div>
+                <div id="loadingSection">
+                    <div class="loading-animation">
+                        <div class="loading-step active">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div>Subiendo archivo</div>
+                        </div>
+                        <div class="loading-step">
+                            <i class="fas fa-robot"></i>
+                            <div>Analizando con AI</div>
+                            <span>RFM → Churn → Forecast → Inventory</span>
+                        </div>
+                        <div class="loading-step">
+                            <i class="fas fa-chart-line"></i>
+                            <div>Generando insights</div>
+                        </div>
+                        <div class="loading-step">
+                            <i class="fas fa-check-circle"></i>
+                            <div>¡Listo!</div>
+                        </div>
+                    </div>
+                    <div class="loading-spinner"></div>
+                </div>
         </div>
     </main>
 
@@ -64,35 +82,58 @@
             const file = files[0];
             if (!file.name.endsWith('.csv')) { showToast('Por favor selecciona un archivo CSV válido', 'warning'); return; }
 
-            document.getElementById('uploadSection').style.display = 'none';
-            document.getElementById('loadingSection').style.display = 'flex';
+            const steps = document.querySelectorAll('.loading-step');
+            const uploadSection = document.getElementById('uploadSection');
+            const loadingSection = document.getElementById('loadingSection');
             
-            // Si el topbar filename object está listo, actualizamos su texto
+            uploadSection.style.display = 'none';
+            loadingSection.style.display = 'flex';
+            
+            // Update filename if available
             const filenameLabel = document.getElementById('topbar-filename');
             if(filenameLabel) filenameLabel.textContent = file.name;
 
-            const formData = new FormData();
-            formData.append('file', file);
+            // Step 1: Upload (2s delay simulation)
+            setTimeout(() => steps[0].classList.remove('active'), 500);
+            setTimeout(() => steps[1].classList.add('active'), 2000);
 
-            try {
-                const response = await fetch('http://localhost:5050/analyze', { method: 'POST', body: formData });
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Error del servidor');
+            // Step 2: AI Analysis (real backend call after 2s)
+            setTimeout(async () => {
+                const formData = new FormData();
+                formData.append('file', file);
                 
-                // Save to our generic Storage service
-                await window.appStorage.saveAnalysis(file.name, result);
+                steps[1].classList.remove('active');
+                steps[2].classList.add('active');
                 
-                // Redirect directly to overview
-                window.location.href = '/pages/overview.html';
-                
-                notifService.add('Archivo cargado: ' + file.name, 'upload');
-            } catch (error) {
-                console.error(error);
-                showToast('Error: ' + error.message + ' — Verifica que el servidor esté en http://localhost:5050', 'error', 7000);
-                document.getElementById('uploadSection').style.display = 'flex';
-            } finally {
-                document.getElementById('loadingSection').style.display = 'none';
-            }
+                try {
+                    const response = await fetch('http://localhost:5050/analyze', { 
+                        method: 'POST', 
+                        body: formData 
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Error del servidor');
+                    
+                    // Save analysis
+                    await window.appStorage.saveAnalysis(file.name, result);
+                    
+                    steps[2].classList.remove('active');
+                    steps[3].classList.add('active');
+                    
+                    notifService.add('¡Análisis completado: ' + file.name, 'success');
+                    
+                    // Redirect after success step
+                    setTimeout(() => {
+                        window.location.href = '/pages/overview.html';
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error(error);
+                    showToast('Error: ' + error.message + ' — Verifica que el servidor esté en http://localhost:5050', 'error', 7000);
+                    uploadSection.style.display = 'flex';
+                    loadingSection.style.display = 'none';
+                    steps.forEach(step => step.classList.remove('active'));
+                }
+            }, 2500);
         }
     </script>
 </body>

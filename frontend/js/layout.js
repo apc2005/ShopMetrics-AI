@@ -10,13 +10,13 @@ function showToast(message, type = 'info', duration = 4000) {
     }
     const icons = {
         success: 'fa-check-circle',
-        error:   'fa-times-circle',
+        error: 'fa-times-circle',
         warning: 'fa-exclamation-triangle',
-        info:    'fa-info-circle',
-        export:  'fa-download',
-        upload:  'fa-cloud-upload-alt',
-        ai:      'fa-robot',
-        delete:  'fa-trash'
+        info: 'fa-info-circle',
+        export: 'fa-download',
+        upload: 'fa-cloud-upload-alt',
+        ai: 'fa-robot',
+        delete: 'fa-trash'
     };
     const toast = document.createElement('div');
     toast.className = `sm-toast sm-toast-${type}`;
@@ -81,23 +81,23 @@ const notifService = {
             return;
         }
         const ICONS = {
-            success: 'fa-check-circle',   error:  'fa-times-circle',
+            success: 'fa-check-circle', error: 'fa-times-circle',
             warning: 'fa-exclamation-triangle', info: 'fa-info-circle',
-            upload:  'fa-cloud-upload-alt', export: 'fa-download',
-            ai:      'fa-robot',          delete: 'fa-trash',
-            rename:  'fa-edit'
+            upload: 'fa-cloud-upload-alt', export: 'fa-download',
+            ai: 'fa-robot', delete: 'fa-trash',
+            rename: 'fa-edit'
         };
         const COLORS = {
-            success: 'var(--green)',   error:  'var(--red)',
-            warning: 'var(--amber)',   info:   'var(--accent-light)',
-            upload:  'var(--blue)',    export: 'var(--green)',
-            ai:      'var(--accent-light)', delete: 'var(--red)',
-            rename:  'var(--amber)'
+            success: 'var(--green)', error: 'var(--red)',
+            warning: 'var(--amber)', info: 'var(--accent-light)',
+            upload: 'var(--blue)', export: 'var(--green)',
+            ai: 'var(--accent-light)', delete: 'var(--red)',
+            rename: 'var(--amber)'
         };
         body.innerHTML = all.map(n => {
             const d = new Date(n.time);
             const t = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                    + ' · ' + d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                + ' · ' + d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
             return `<div class="bell-notif ${n.read ? '' : 'bell-notif-unread'}">
                 <i class="fas ${ICONS[n.type] || ICONS.info}" style="color:${COLORS[n.type] || COLORS.info};font-size:14px;flex-shrink:0;margin-top:2px;"></i>
                 <div style="flex:1;min-width:0;">
@@ -157,11 +157,11 @@ async function exportReport() {
 
     // Lista de recomendaciones según los datos del análisis
     const recs = [];
-    if (highChurn / totalSeg > 0.3) recs.push('⚠️ <strong>Alta tasa de abandono:</strong> Más del 30% de clientes está en riesgo de churn. Implementa campañas de reactivación urgentes con descuentos personalizados.');
-    if ((segCounts['Champions'] || 0) / totalSeg < 0.2) recs.push('📈 <strong>Potencia a tus Champions:</strong> Menos del 20% son clientes top. Crea programas de fidelización exclusivos (acceso anticipado, ofertas VIP) para retenerlos.');
-    if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) recs.push('💤 <strong>Clientes dormidos:</strong> El segmento Hibernating supera el 25%. Lanza una campaña de win-back con incentivos atractivos antes de perderlos definitivamente.');
-    if ((segCounts['At Risk'] || 0) / totalSeg > 0.2) recs.push('🚨 <strong>Riesgo medio elevado:</strong> El segmento "At Risk" supera el 20%. Actúa rápido con descuentos personalizados antes de que migren a Hibernating.');
-    if ((segCounts['Promising'] || 0) / totalSeg > 0.3) recs.push('🌱 <strong>Nurturing de Promising:</strong> Tienes una base sólida de clientes "Promising". Aumenta su frecuencia de compra con cross-selling y bundles estratégicos.');
+    if (highChurn / totalSeg > 0.3) recs.push('<strong>Alta tasa de abandono:</strong> Más del 30% de clientes está en riesgo de churn. Implementa campañas de reactivación urgentes con descuentos personalizados.');
+    if ((segCounts['Champions'] || 0) / totalSeg < 0.2) recs.push('<strong>Potencia a tus Champions:</strong> Menos del 20% son clientes top. Crea programas de fidelización exclusivos (acceso anticipado, ofertas VIP) para retenerlos.');
+    if ((segCounts['Hibernating'] || 0) / totalSeg > 0.25) recs.push('<strong>Clientes dormidos:</strong> El segmento Hibernating supera el 25%. Lanza una campaña de win-back con incentivos atractivos antes de perderlos definitivamente.');
+    if ((segCounts['At Risk'] || 0) / totalSeg > 0.2) recs.push('<strong>Riesgo medio elevado:</strong> El segmento "At Risk" supera el 20%. Actúa rápido con descuentos personalizados antes de que migren a Hibernating.');
+    if ((segCounts['Promising'] || 0) / totalSeg > 0.3) recs.push('<strong>Nurturing de Promising:</strong> Tienes una base sólida de clientes "Promising". Aumenta su frecuencia de compra con cross-selling y bundles estratégicos.');
     recs.push('📊 <strong>Monitoreo continuo:</strong> Analiza la evolución RFM mensualmente para detectar cambios de comportamiento temprano y ajustar estrategias.');
     recs.push('🤖 <strong>AI Advisor:</strong> Usa el módulo AI Advisor de la plataforma para recomendaciones específicas y personalizadas basadas en tu dataset.');
 
@@ -198,7 +198,7 @@ tr:hover td{background:#fafafa;}
 </head>
 <body>
 <div class="cover">
-  <h1>📊 Informe de Análisis</h1>
+  <h1>Informe de Análisis</h1>
   <div class="sub">${data.filename} &nbsp;·&nbsp; Generado el ${now}</div>
   <div class="meta">
     <div class="mi"><strong>${(data.rows || 0).toLocaleString()}</strong><span>Registros</span></div>
@@ -209,23 +209,23 @@ tr:hover td{background:#fafafa;}
 </div>
 <div class="container">
   <div class="section">
-    <div class="section-title">📌 Métricas Clave (KPIs)</div>
+    <div class="section-title">Métricas Clave (KPIs)</div>
     <table><thead><tr><th>Indicador</th><th>Valor</th></tr></thead><tbody>${kpiRows}</tbody></table>
   </div>
   <div class="section">
-    <div class="section-title">👥 Distribución de Segmentos RFM</div>
+    <div class="section-title">Distribución de Segmentos RFM</div>
     <table><thead><tr><th>Segmento</th><th>Clientes</th><th>% del Total</th></tr></thead><tbody>${segRows}</tbody></table>
   </div>
   <div class="section">
-    <div class="section-title">🔥 Top 10 Clientes con Mayor Riesgo de Abandono</div>
+    <div class="section-title">Top 10 Clientes con Mayor Riesgo de Abandono</div>
     <table><thead><tr><th>Cliente</th><th>Recencia (días)</th><th>Frecuencia</th><th>Valor</th><th>Riesgo Churn</th><th>Segmento</th></tr></thead><tbody>${churnRows}</tbody></table>
   </div>
   <div class="section">
-    <div class="section-title">📦 Análisis por Categoría</div>
+    <div class="section-title">Análisis por Categoría</div>
     <table><thead><tr><th>Categoría</th><th>Ventas</th><th>Beneficio</th></tr></thead><tbody>${catRows}</tbody></table>
   </div>
   <div class="section">
-    <div class="section-title">💡 Recomendaciones Estratégicas</div>
+    <div class="section-title">Recomendaciones Estratégicas</div>
     ${recs.map(r => `<div class="rec">${r}</div>`).join('')}
   </div>
 </div>
@@ -291,13 +291,13 @@ function initCollapsibles() {
 // Genera y pinta la barra lateral de navegación
 function renderSidebar() {
     const activePage = window.location.pathname.split('/').pop().split('.')[0] || 'index';
-    const isOverview     = activePage === 'overview';
-    const isCustomers    = activePage === 'customers';
-    const isAnalytics    = activePage === 'analytics';
-    const isInventory    = activePage === 'inventory';
+    const isOverview = activePage === 'overview';
+    const isCustomers = activePage === 'customers';
+    const isAnalytics = activePage === 'analytics';
+    const isInventory = activePage === 'inventory';
     const isTransactions = activePage === 'transactions';
-    const isHistory      = activePage === 'history';
-    const isSettings     = activePage === 'settings';
+    const isHistory = activePage === 'history';
+    const isSettings = activePage === 'settings';
 
     const sidebarHTML = `
         <aside class="sidebar">
@@ -364,7 +364,7 @@ function renderSidebar() {
                 <div class="user-avatar" id="sidebar-avatar">?</div>
                 <div style="flex:1;min-width:0;">
                     <div class="user-name" id="sidebar-username" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Usuario</div>
-                    <div class="user-role" id="sidebar-role">Data Analyst</div>
+                    <div class="user-role" id="sidebar-role">Jefe</div>
                 </div>
                 <i class="fas fa-chevron-up" id="sidebar-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;"></i>
             </div>
@@ -393,13 +393,13 @@ function renderSidebar() {
         // Si el usuario guardó su rol en settings, lo mostramos
         const settings = JSON.parse(localStorage.getItem('sm_settings') || '{}');
         if (settings.userRole) document.getElementById('sidebar-role').textContent = settings.userRole;
-    } catch(e) {}
+    } catch (e) { }
 }
 
 function toggleUserMenu() {
-    const menu    = document.getElementById('sidebar-user-menu');
+    const menu = document.getElementById('sidebar-user-menu');
     const chevron = document.getElementById('sidebar-chevron');
-    const isOpen  = menu.style.display !== 'none';
+    const isOpen = menu.style.display !== 'none';
     menu.style.display = isOpen ? 'none' : 'block';
     chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
@@ -414,10 +414,6 @@ function renderTopbar(title, subtitle = '') {
                 <span class="topbar-sub" id="topbar-filename">${subtitle}</span>
             </div>
             <div class="topbar-actions">
-                <div class="search-bar">
-                    <i class="fas fa-search" style="font-size:11px;color:var(--text-muted)"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
 
                 <!-- CAMPANITA -->
                 <div class="icon-btn bell-btn" id="bell-btn" title="Notificaciones">
@@ -513,7 +509,7 @@ function applyThemeGlobal() {
             document.documentElement.style.setProperty('--accent-glow', s.accentColor + '26');
             document.documentElement.style.setProperty('--border-accent', s.accentColor + '66');
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -525,16 +521,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Funciones pequeñas de ayuda que se usan en varias páginas
 const SEGMENT_COLORS = {
-    'Champions':  '#10b981',
-    'Promising':  '#3b82f6',
-    'At Risk':    '#f59e0b',
-    'Hibernating':'#ef4444'
+    'Champions': '#10b981',
+    'Promising': '#3b82f6',
+    'At Risk': '#f59e0b',
+    'Hibernating': '#ef4444'
 };
 const SEGMENT_CLASS = {
-    'Champions':  'seg-champions',
-    'Promising':  'seg-promising',
-    'At Risk':    'seg-risk',
-    'Hibernating':'seg-hibernating'
+    'Champions': 'seg-champions',
+    'Promising': 'seg-promising',
+    'At Risk': 'seg-risk',
+    'Hibernating': 'seg-hibernating'
 };
 
 function fmt(num) {
@@ -560,7 +556,7 @@ function churnColor(prob) {
     return '#10b981';
 }
 function invStatusClass(status) {
-    if (status === 'Star')          return 'inv-status-star';
+    if (status === 'Star') return 'inv-status-star';
     if (status === 'Underperformer') return 'inv-status-under';
     return 'inv-status-stable';
 }

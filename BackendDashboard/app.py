@@ -111,9 +111,7 @@ def list_users():
                      'created_at': u['created_at']} for u in users])
 
 
-# ═══════════════════════════════════════════════════════════════════
 # RUTAS ORIGINALES
-# ═══════════════════════════════════════════════════════════════════
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -132,21 +130,20 @@ def analyze():
     filename   = request.files['file'].filename
 
     try:
-        # ── Fase 1: Carga y estandarización
+        # Fase 1: Carga y estandarización
         df_raw = load_and_standardize(file_bytes)
-        print(f"  Filas cargadas : {len(df_raw)}")
-        print(f"  Columnas       : {list(df_raw.columns)}")
+        print('=== FASE 1: Carga ===')
+        print(f"  Filas: {len(df_raw)}, Columnas: {list(df_raw.columns)}")
 
-        # ── Fase 2: Validación de calidad
+        print('=== FASE 2: Validación ===')
         validation = data_validation(df_raw)
         validation['clean_rows'] = len(df_raw)
 
-        # ── Fase 3: Limpieza
+        print('=== FASE 3: Limpieza ===')
         df_clean = universal_cleaner(df_raw)
         validation['clean_rows'] = len(df_clean)
-        print(f"  Filas tras limpieza : {len(df_clean)}")
 
-        # ── Fase 4: KPIs
+        print('=== FASE 4: KPIs ===')
         df_for_kpis = df_raw.copy()
         df_for_kpis['date']        = pd.to_datetime(df_for_kpis['date'], errors='coerce')
         df_for_kpis['total_sales'] = pd.to_numeric(df_for_kpis['total_sales'], errors='coerce')
@@ -154,22 +151,22 @@ def analyze():
         analyzer = BusinessAnalyzer(df_for_kpis)
         kpis     = analyzer.get_kpis()
 
-        # ── Fase 5: Feature Engineering (RFM)
+        print('=== FASE 5: RFM ===')
         rfm_table = data_engineering_pipeline(df_clean)
-        print(f"  Clientes únicos : {len(rfm_table)}")
+        print(f"  Clientes únicos: {len(rfm_table)}")
 
-        # ── Fase 6a: Segmentación KMeans
+        print('=== FASE 6a: Segmentación ===')
         rfm_segmented = train_segmentation(rfm_table)
 
-        # ── Fase 6b: Churn (Random Forest + CV)
+        print('=== FASE 6b: Churn ===')
         churn_result  = train_churn_model(rfm_segmented)
         rfm_final     = churn_result['rfm_df']
         churn_metrics = churn_result['metrics']
 
-        # ── Fase 6c: Forecasting
+        print('=== FASE 6c: Forecast ===')
         forecast_result = train_sales_forecast(df_clean)
 
-        # ── Fase 7: Categorías, inventario y región
+        print('=== FASE 7: Análisis final ===')
         cat_analysis   = analyzer.get_category_analysis().reset_index()
         inventory_data = analyzer.get_top_products(top_n=20)
         top_churn      = rfm_final.sort_values('Churn_Probability', ascending=False).head(50)

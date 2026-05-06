@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/settings.css">
     <script src="/js/storage.js"></script>
     <script src="/js/layout.js"></script>
 </head>
@@ -59,7 +60,7 @@
                             </div>
                             <div class="settings-field">
                                 <div class="settings-label">Rol / Cargo</div>
-                                <input class="settings-input" type="text" id="s-role" placeholder="Data Analyst">
+                                <input class="settings-input" type="text" id="s-role" placeholder="Jefe">
                             </div>
 
                             <button class="btn-save" onclick="saveSection('cuenta')"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar cambios</button>
@@ -275,11 +276,13 @@ function initSettings() {
         document.getElementById('theme-light').style.borderColor = 'var(--accent)';
     }
 
-    // Cuenta
-    if (s.userName)  document.getElementById('s-name').value  = s.userName;
-    if (s.userEmail) document.getElementById('s-email').value = s.userEmail;
-    if (s.userRole)  document.getElementById('s-role').value  = s.userRole;
-    if (s.lang)      document.getElementById('s-lang').value  = s.lang;
+    // Cuenta - safe population
+    const nameEl = document.getElementById('s-name');
+    const emailEl = document.getElementById('s-email');
+    const roleEl = document.getElementById('s-role');
+    if (nameEl && s.userName) nameEl.value = s.userName;
+    if (emailEl && s.userEmail) emailEl.value = s.userEmail;
+    if (roleEl && s.userRole) roleEl.value = s.userRole;
 
     // Empresa
     if (s.company)  document.getElementById('s-company').value  = s.company;
@@ -318,21 +321,34 @@ function saveSettings(partial) {
 }
 
 function saveSection(section) {
+    const btn = event ? event.target : null;
+    if (btn) btn.disabled = true; btn && (btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
     if (section === 'cuenta') {
+        const nameEl = document.getElementById('s-name');
+        const emailEl = document.getElementById('s-email');
+        const roleEl = document.getElementById('s-role');
+        
+        if (!nameEl || !emailEl || !roleEl) {
+            showToast('Error: Formulario no encontrado', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save" style="margin-right:6px;"></i>Guardar cambios'; }
+            return;
+        }
+        
         saveSettings({
-            userName:  document.getElementById('s-name').value.trim(),
-            userEmail: document.getElementById('s-email').value.trim(),
-            userRole:  document.getElementById('s-role').value.trim(),
-            lang:      document.getElementById('s-lang').value,
+            userName: nameEl.value.trim(),
+            userEmail: emailEl.value.trim(),
+            userRole: roleEl.value.trim(),
         });
-        // Actualizar sidebar
-        const nameEl = document.getElementById('sidebar-username');
-        const avatarEl = document.getElementById('sidebar-avatar');
-        const name = document.getElementById('s-name').value.trim();
-        if (nameEl && name) {
-            nameEl.textContent = name;
-            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-            if (avatarEl) avatarEl.textContent = initials;
+        
+        // Actualizar sidebar safely
+        const sidebarName = document.getElementById('sidebar-username');
+        const sidebarAvatar = document.getElementById('sidebar-avatar');
+        const name = nameEl.value.trim();
+        if (sidebarName && name) {
+            sidebarName.textContent = name;
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            if (sidebarAvatar) sidebarAvatar.textContent = initials;
         }
     } else if (section === 'empresa') {
         saveSettings({
@@ -342,19 +358,37 @@ function saveSection(section) {
             sector:   document.getElementById('s-sector').value,
         });
     } else if (section === 'notificaciones') {
+        const uploadEl = document.getElementById('notif-upload');
+        const exportEl = document.getElementById('notif-export');
+        const historyEl = document.getElementById('notif-history');
+        const aiEl = document.getElementById('notif-ai');
+        const systemEl = document.getElementById('notif-system');
+        
+        if (!uploadEl || !exportEl || !historyEl || !aiEl || !systemEl) {
+            showToast('Error: Campos de notificaciones no encontrados', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save" style="margin-right:6px;"></i>Guardar preferencias'; }
+            return;
+        }
+        
         saveSettings({ notif: {
-            upload:  document.getElementById('notif-upload').checked,
-            export:  document.getElementById('notif-export').checked,
-            history: document.getElementById('notif-history').checked,
-            ai:      document.getElementById('notif-ai').checked,
-            system:  document.getElementById('notif-system').checked,
+            upload:  uploadEl.checked,
+            export:  exportEl.checked,
+            history: historyEl.checked,
+            ai:      aiEl.checked,
+            system:  systemEl.checked,
         }});
     } else if (section === 'apariencia') {
         const selected = document.querySelector('.color-swatch.selected');
         if (selected) saveSettings({ accentColor: selected.dataset.color });
     }
-    notifService.add('Configuración guardada: ' + section, 'success');
+    
     showToast('¡Configuración guardada correctamente!', 'success');
+    setTimeout(() => {
+        if (btn) { 
+            btn.disabled = false; 
+            btn.innerHTML = '<i class="fas fa-save" style="margin-right:6px;"></i>Guardar cambios'; 
+        }
+    }, 1500);
 }
 
 function changePassword() {

@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-config.py — Configuración global y constantes del proyecto
-"""
- 
 from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supermarket BI — AI Advisor</title>
+    <title>ShopMetrics AI — AI Advisor</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
@@ -372,7 +373,7 @@
                 // Update model badge with successful model
                 const usedModel = 'Mistral Small Latest';
                 document.querySelector('.response-model-badge').innerHTML = `
-                    <div class="dot"></div> ${usedModel} ✅
+                    <div class="dot"></div> ${usedModel}
                 `;
 
                 // Renderizar resultado
@@ -403,7 +404,7 @@
                         <div class="error-card-msg">
                             <strong>Error al consultar la IA</strong><br>
                             ${errorMsg}${suggestion}<br><br>
-                            <small>✅ Verifica tu clave en <a href="https://console.mistral.ai/" target="_blank">Mistral AI Console</a> (gratis)</small>
+                            <small>Verifica tu clave en <a href="https://console.mistral.ai/" target="_blank">Mistral AI Console</a> (gratis)</small>
                         </div>
                     </div>
                 `;

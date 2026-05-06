@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopMetrics AI — Inteligencia de Negocio para Supermercados</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --bg2: #13161f;
+      --bg3: #181c27;
+      --surface: #1e2235;
+      --surface2: #252a3d;
+      --border: rgba(99,102,241,0.15);
+      --accent: #6366f1;
+      --accent2: #818cf8;
+      --accent3: #4338ca;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --pink: #f472b6;
+      --text: #e8eaf6;
+      --text2: #9fa3c7;
+      --text3: #6b7280;
+      --radius: 14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s, backdrop-filter 0.3s, border-bottom 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(15,17,23,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #818cf8, #4338ca);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .nav-logo-text span { color: var(--accent2); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--surface); }
+
+    .nav-ctas {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-ghost {
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); background: rgba(99,102,241,0.08); }
+
+    .btn-primary {
+      text-decoration: none;
+      background: var(--accent);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(99,102,241,0.4); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 700px;
+      background: radial-gradient(ellipse at center, rgba(99,102,241,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 860px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent2);
+      margin-bottom: 28px;
+    }
+    .hero-badge i { font-size: 11px; }
+
+    .hero-title {
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -2px;
+      margin-bottom: 22px;
+    }
+    .hero-title .grad {
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 40%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text2);
+      max-width: 580px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .btn-hero-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      background: var(--accent);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px 28px;
+      border-radius: 10px;
+      transition: all 0.25s;
+    }
+    .btn-hero-primary:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.45); }
+
+    .btn-hero-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+      padding: 13px 28px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: all 0.25s;
+    }
+    .btn-hero-secondary:hover { border-color: var(--accent); background: rgba(99,102,241,0.08); transform: translateY(-2px); }
+
+    /* ─── DASHBOARD MOCKUP ─── */
+    .hero-mockup {
+      position: relative;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .mockup-frame {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
+    }
+    .mockup-bar {
+      background: var(--bg3);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dots { display: flex; gap: 6px; }
+    .mockup-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .mockup-dot:nth-child(1) { background: #ff5f57; }
+    .mockup-dot:nth-child(2) { background: #febc2e; }
+    .mockup-dot:nth-child(3) { background: #28c840; }
+    .mockup-url {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .mockup-content {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .mockup-kpi {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .mockup-kpi-label { font-size: 10px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .mockup-kpi-val { font-size: 20px; font-weight: 700; color: var(--text); }
+    .mockup-kpi-val span { font-size: 12px; font-weight: 500; }
+    .mockup-kpi-val .up { color: var(--green); }
+    .mockup-kpi-val .down { color: #f87171; }
+    .mockup-chart-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+    .mockup-chart {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      height: 100px;
+    }
+    .mockup-chart-label { font-size: 10px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .mockup-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 56px;
+    }
+    .mockup-bar-el {
+      flex: 1;
+      background: linear-gradient(to top, var(--accent), var(--accent2));
+      border-radius: 3px 3px 0 0;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .mockup-bar-el:nth-child(3) { opacity: 1; }
+    .mockup-segments {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: center;
+    }
+    .mockup-seg {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text2);
+    }
+    .mockup-seg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      padding: 60px 40px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label { font-size: 14px; color: var(--text2); font-weight: 500; }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 100px 40px; }
+
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+    .section-tag::before {
+      content: '';
+      width: 20px; height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-title .grad {
+      background: linear-gradient(135deg, #818cf8, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-sub {
+      font-size: 17px;
+      color: var(--text2);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ─── FEATURES GRID ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(99,102,241,0.35); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      margin-bottom: 18px;
+    }
+
+    .feature-name {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .feature-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-section { background: var(--bg2); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: calc(16.67% + 30px);
+      right: calc(16.67% + 30px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0.3;
+    }
+    .step { text-align: center; }
+    .step-num {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: white;
+      margin: 0 auto 20px;
+      position: relative;
+      box-shadow: 0 0 0 8px rgba(99,102,241,0.12);
+    }
+    .step-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+    /* ─── CSV REQUIREMENTS ─── */
+    .csv-section { background: var(--bg); }
+    .csv-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    .csv-info { }
+    .col-group { margin-bottom: 32px; }
+    .col-group-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+    .col-group-title.req { color: var(--accent2); }
+    .col-group-title.opt { color: var(--yellow); }
+
+    .col-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .col-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+    .col-badge.req { background: rgba(99,102,241,0.15); color: var(--accent2); border: 1px solid rgba(99,102,241,0.25); }
+    .col-badge.opt { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+
+    .col-text { font-size: 14px; color: var(--text2); padding-top: 3px; }
+    .col-text strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+    .csv-preview {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .csv-preview-header {
+      background: var(--surface);
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .csv-preview-header i { color: var(--green); }
+    .csv-code {
+      padding: 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .csv-row { display: flex; gap: 0; }
+    .csv-cell {
+      padding: 2px 0;
+      min-width: 120px;
+    }
+    .csv-cell.header-cell { color: var(--accent2); font-weight: 500; }
+    .csv-cell.req-cell { color: var(--green); }
+    .csv-cell.opt-cell { color: var(--yellow); }
+    .csv-cell.id-cell { color: #f472b6; }
+    .csv-comma { color: var(--text3); }
+
+    .csv-note {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: rgba(99,102,241,0.07);
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+    .csv-note i { color: var(--accent2); margin-right: 6px; }
+
+    /* ─── AI SPOTLIGHT ─── */
+    .ai-section { background: var(--bg2); }
+    .ai-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 70px;
+      align-items: center;
+    }
+    .ai-chat {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .ai-chat-header {
+      background: var(--surface);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ai-chat-avatar {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .ai-chat-name { font-weight: 600; font-size: 14px; }
+    .ai-chat-status { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 4px; }
+    .ai-chat-status::before { content: ''; width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+    .ai-chat-messages { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .msg { max-width: 85%; }
+    .msg.user { align-self: flex-end; }
+    .msg.ai { align-self: flex-start; }
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .msg.user .msg-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+    .msg.ai .msg-bubble { background: var(--surface); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+    .typing { display: flex; gap: 4px; padding: 14px; }
+    .typing-dot {
+      width: 7px; height: 7px;
+      background: var(--text3);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+      40% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    .ai-features { }
+    .ai-feature-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ai-feature-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .ai-feature-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: rgba(99,102,241,0.12);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent2);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .ai-feature-text strong { font-size: 15px; display: block; margin-bottom: 4px; }
+    .ai-feature-text p { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+    /* ─── EXPORT SECTION ─── */
+    .export-section { background: var(--bg); }
+    .export-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .export-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .export-card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+    .export-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 20px;
+    }
+    .export-name { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+    .export-desc { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+    .export-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .export-tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    /* ─── FINAL CTA ─── */
+    .cta-section {
+      background: var(--bg2);
+      padding: 120px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(99,102,241,0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+    .cta-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 18px;
+      line-height: 1.1;
+    }
+    .cta-sub { font-size: 17px; color: var(--text2); margin-bottom: 42px; line-height: 1.6; }
+    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 40px;
+    }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .footer-logo-text { font-size: 15px; font-weight: 700; color: var(--text2); }
+    .footer-copy { font-size: 13px; color: var(--text3); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--text3); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text2); }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-left.visible { opacity: 1; transform: translateX(0); }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+    .delay-4 { transition-delay: 0.4s; }
+    .delay-5 { transition-delay: 0.5s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 90px 20px 60px; }
+      section { padding: 70px 20px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .steps::before { display: none; }
+      .csv-layout, .ai-layout { grid-template-columns: 1fr; }
+      .export-cards { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .mockup-content { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="20" width="5" height="7" rx="1.5" fill="rgba(255,255,255,0.55)"/>
+        <rect x="13" y="14" width="5" height="13" rx="1.5" fill="rgba(255,255,255,0.8)"/>
+        <rect x="22" y="8" width="5" height="19" rx="1.5" fill="white"/>
+        <path d="M6.5 19.5 L15.5 13.5 L24.5 7.5" stroke="rgba(196,181,253,0.85)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <circle cx="24.5" cy="7.5" r="2.2" fill="#c4b5fd"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">ShopMetrics <span>AI</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Módulos</a></li>
+    <li><a href="#how">Cómo funciona</a></li>
+    <li><a href="#csv">Datos necesarios</a></li>
+    <li><a href="#ai">IA Advisor</a></li>
+  </ul>
+  <div class="nav-ctas">
+    <a href="pages/login.html" class="btn-ghost">Iniciar sesión</a>
+    <a href="pages/register.html" class="btn-primary">Empezar gratis</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <i class="fas fa-sparkles"></i>
+      Plataforma de BI con Inteligencia Artificial
+    </div>
+    <h1 class="hero-title">
+      Convierte tus datos de venta<br/>en <span class="grad">decisiones inteligentes</span>
+    </h1>
+    <p class="hero-sub">
+      ShopMetrics AI analiza automáticamente tus datos transaccionales, segmenta clientes con RFM, predice churn y genera recomendaciones estratégicas con Mistral AI.
+    </p>
+    <div class="hero-btns">
+      <a href="pages/register.html" class="btn-hero-primary">
+        <i class="fas fa-rocket"></i>
+        Comenzar ahora
+      </a>
+      <a href="pages/login.html" class="btn-hero-secondary">
+        <i class="fas fa-arrow-right-to-bracket"></i>
+        Iniciar sesión
+      </a>
+    </div>
+    <!-- Dashboard Mockup -->
+    <div class="hero-mockup">
+      <div class="mockup-frame">
+        <div class="mockup-bar">
+          <div class="mockup-dots">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-url">shopmetrics-ai.app/dashboard</div>
+        </div>
+        <div class="mockup-content">
+          <div class="mockup-kpi">
+            <div class="mockup-kpi-label">Ventas Totales</div>
+            <div class="mockup-kpi-val">€184k <span class="up">+12%</span></div>
+          </div>
+          <div class="mockup-kpi">
+            <div class="mockup-kpi-label">Clientes Activos</div>
+            <div class="mockup-kpi-val">3,241 <span class="up">+8%</span></div>
+          </div>
+          <div class="mockup-kpi">
+            <div class="mockup-kpi-label">Riesgo Churn</div>
+            <div class="mockup-kpi-val">18% <span class="down">+2pt</span></div>
+          </div>
+          <div class="mockup-kpi">
+            <div class="mockup-kpi-label">Champions RFM</div>
+            <div class="mockup-kpi-val">624 <span class="up">+5%</span></div>
+          </div>
+          <div class="mockup-chart-row">
+            <div class="mockup-chart">
+              <div class="mockup-chart-label">Ventas mensuales</div>
+              <div class="mockup-bars">
+                <div class="mockup-bar-el" style="height:38%"></div>
+                <div class="mockup-bar-el" style="height:52%"></div>
+                <div class="mockup-bar-el" style="height:45%"></div>
+                <div class="mockup-bar-el" style="height:70%"></div>
+                <div class="mockup-bar-el" style="height:60%"></div>
+                <div class="mockup-bar-el" style="height:83%"></div>
+                <div class="mockup-bar-el" style="height:75%"></div>
+                <div class="mockup-bar-el" style="height:90%"></div>
+                <div class="mockup-bar-el" style="height:78%"></div>
+                <div class="mockup-bar-el" style="height:100%"></div>
+              </div>
+            </div>
+            <div class="mockup-chart">
+              <div class="mockup-chart-label">Segmentos RFM</div>
+              <div class="mockup-segments">
+                <div class="mockup-seg"><div class="mockup-seg-dot" style="background:#6366f1"></div>Champions 19%</div>
+                <div class="mockup-seg"><div class="mockup-seg-dot" style="background:#34d399"></div>Promising 24%</div>
+                <div class="mockup-seg"><div class="mockup-seg-dot" style="background:#fbbf24"></div>At Risk 31%</div>
+                <div class="mockup-seg"><div class="mockup-seg-dot" style="background:#f87171"></div>Hibernating 26%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS BAR ─── -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item reveal delay-1">
+      <div class="stat-num" data-target="6" data-suffix="+">0</div>
+      <div class="stat-label">Módulos de análisis</div>
+    </div>
+    <div class="stat-item reveal delay-2">
+      <div class="stat-num" data-target="4" data-suffix="">0</div>
+      <div class="stat-label">Segmentos RFM</div>
+    </div>
+    <div class="stat-item reveal delay-3">
+      <div class="stat-num" data-target="3" data-suffix="">0</div>
+      <div class="stat-label">Formatos de exportación</div>
+    </div>
+    <div class="stat-item reveal delay-4">
+      <div class="stat-num" data-target="100" data-suffix="%">0</div>
+      <div class="stat-label">Impulsado por IA</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<section id="features">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Módulos</div>
+      <h2 class="section-title">Todo lo que necesitas para<br/><span class="grad">conocer tu negocio</span></h2>
+      <p class="section-sub">Seis módulos integrados que transforman datos brutos de ventas en conocimiento accionable.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.12);color:#818cf8;">
+          <i class="fas fa-gauge-high"></i>
+        </div>
+        <div class="feature-name">Panel General</div>
+        <p class="feature-desc">Vista ejecutiva con KPIs principales, tendencias de ventas y alertas críticas. El punto de partida para entender el estado de tu negocio de un vistazo.</p>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon" style="background:rgba(52,211,153,0.1);color:#34d399;">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="feature-name">Clientes y RFM</div>
+        <p class="feature-desc">Segmentación automática en Champions, Promising, At Risk e Hibernating. Identifica tus clientes más valiosos y los que necesitan atención urgente.</p>
+      </div>
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon" style="background:rgba(251,191,36,0.1);color:#fbbf24;">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="feature-name">Analítica Avanzada</div>
+        <p class="feature-desc">Análisis de categorías, productos top, patrones temporales y comparativas de rendimiento. Descubre qué vende más y cuándo.</p>
+      </div>
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon" style="background:rgba(244,114,182,0.1);color:#f472b6;">
+          <i class="fas fa-brain"></i>
+        </div>
+        <div class="feature-name">IA Advisor</div>
+        <p class="feature-desc">Consultor de negocio impulsado por Mistral AI. Hace preguntas en lenguaje natural y recibe análisis profundos y recomendaciones estratégicas personalizadas.</p>
+      </div>
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon" style="background:rgba(167,139,250,0.1);color:#a78bfa;">
+          <i class="fas fa-boxes-stacked"></i>
+        </div>
+        <div class="feature-name">Inventario</div>
+        <p class="feature-desc">Análisis de margen vs. volumen, detección de productos críticos y visualización de burbujas para optimizar tu mix de producto y gestión de stock.</p>
+      </div>
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon" style="background:rgba(56,189,248,0.1);color:#38bdf8;">
+          <i class="fas fa-receipt"></i>
+        </div>
+        <div class="feature-name">Transacciones</div>
+        <p class="feature-desc">Historial completo y filtrable de todas las transacciones. Busca, filtra y exporta los datos que necesitas con total flexibilidad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section id="how" class="how-section">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center; max-width:580px; margin:0 auto 64px;">
+      <div class="section-tag">Proceso</div>
+      <h2 class="section-title">En marcha en<br/><span class="grad">3 pasos simples</span></h2>
+      <p class="section-sub" style="margin-bottom:0;">Sin configuraciones complicadas. Sin programación. Solo tus datos y resultados inmediatos.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal delay-1">
+        <div class="step-num">1</div>
+        <div class="step-title">Crea tu cuenta</div>
+        <p class="step-desc">Regístrate en segundos. No se requiere tarjeta de crédito ni instalación. Accede desde cualquier navegador moderno.</p>
+      </div>
+      <div class="step reveal delay-2">
+        <div class="step-num">2</div>
+        <div class="step-title">Sube tu CSV</div>
+        <p class="step-desc">Exporta tus datos de ventas en formato CSV con las columnas requeridas. El sistema los procesa automáticamente al instante.</p>
+      </div>
+      <div class="step reveal delay-3">
+        <div class="step-num">3</div>
+        <div class="step-title">Explora y decide</div>
+        <p class="step-desc">Navega por los 6 módulos, consulta al IA Advisor y exporta informes profesionales en HTML, PDF o Excel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CSV REQUIREMENTS ─── -->
+<section id="csv" class="csv-section">
+  <div class="section-inner">
+    <div class="csv-layout">
+      <div class="csv-info">
+        <div class="reveal">
+          <div class="section-tag">Datos necesarios</div>
+          <h2 class="section-title">¿Qué necesita<br/><span class="grad">tu archivo CSV?</span></h2>
+          <p class="section-sub" style="margin-bottom:40px;">Solo necesitas exportar tus datos de ventas en un CSV estándar. ShopMetrics AI se encarga del resto.</p>
+        </div>
+        <div class="col-group reveal delay-1">
+          <div class="col-group-title req"><i class="fas fa-asterisk" style="font-size:9px; margin-right:6px;"></i>Columnas obligatorias</div>
+          <div class="col-item">
+            <span class="col-badge req">customer_id</span>
+            <div class="col-text"><strong>Identificador de cliente</strong>Número o código único que identifica a cada cliente en tu sistema.</div>
+          </div>
+          <div class="col-item">
+            <span class="col-badge req">date</span>
+            <div class="col-text"><strong>Fecha de la transacción</strong>En formato YYYY-MM-DD (ej. 2024-03-15). Necesario para el análisis temporal.</div>
+          </div>
+          <div class="col-item">
+            <span class="col-badge req">total_sales</span>
+            <div class="col-text"><strong>Importe de la venta</strong>Valor numérico del total de la transacción (sin símbolo de moneda).</div>
+          </div>
+        </div>
+        <div class="col-group reveal delay-2">
+          <div class="col-group-title opt"><i class="fas fa-plus-circle" style="font-size:11px; margin-right:6px;"></i>Columnas opcionales (enriquecen el análisis)</div>
+          <div class="col-item">
+            <span class="col-badge opt">product_category</span>
+            <div class="col-text"><strong>Categoría del producto</strong>Activa el análisis por categorías y el módulo de inventario completo.</div>
+          </div>
+          <div class="col-item">
+            <span class="col-badge opt">product_name</span>
+            <div class="col-text"><strong>Nombre del producto</strong>Permite ver el ranking de productos más vendidos y análisis de mix.</div>
+          </div>
+        </div>
+        <div class="csv-note reveal delay-3">
+          <i class="fas fa-circle-info"></i>
+          El archivo puede contener miles o millones de filas. ShopMetrics AI procesa grandes volúmenes de datos de forma eficiente directamente en el navegador.
+        </div>
+      </div>
+      <div class="csv-preview reveal-right">
+        <div class="csv-preview-header">
+          <i class="fas fa-file-csv"></i>
+          ventas_supermercado.csv
+        </div>
+        <div class="csv-code">
+          <div class="csv-row">
+            <span class="csv-cell header-cell">customer_id</span><span class="csv-comma">,</span>
+            <span class="csv-cell header-cell">date</span><span class="csv-comma">,</span>
+            <span class="csv-cell header-cell">total_sales</span><span class="csv-comma">,</span>
+            <span class="csv-cell header-cell">product_category</span><span class="csv-comma">,</span>
+            <span class="csv-cell header-cell">product_name</span>
+          </div>
+          <div class="csv-row" style="margin-top:8px;">
+            <span class="csv-cell id-cell">C001</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">2024-01-15</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">47.32</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Frutas</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Manzanas</span>
+          </div>
+          <div class="csv-row">
+            <span class="csv-cell id-cell">C002</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">2024-01-15</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">123.80</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Lácteos</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Leche entera</span>
+          </div>
+          <div class="csv-row">
+            <span class="csv-cell id-cell">C001</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">2024-01-22</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">89.15</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Carnicería</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Pechuga pollo</span>
+          </div>
+          <div class="csv-row">
+            <span class="csv-cell id-cell">C003</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">2024-01-23</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">205.60</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Bebidas</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Agua mineral</span>
+          </div>
+          <div class="csv-row">
+            <span class="csv-cell id-cell">C002</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">2024-02-01</span><span class="csv-comma">,</span>
+            <span class="csv-cell req-cell">67.40</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Panadería</span><span class="csv-comma">,</span>
+            <span class="csv-cell opt-cell">Pan integral</span>
+          </div>
+          <div class="csv-row" style="opacity:0.4;">
+            <span style="color:var(--text3); font-size:12px;">... más filas ...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── AI ADVISOR ─── -->
+<section id="ai" class="ai-section">
+  <div class="section-inner">
+    <div class="ai-layout">
+      <div class="ai-chat reveal-left">
+        <div class="ai-chat-header">
+          <div class="ai-chat-avatar"><i class="fas fa-brain" style="color:white;font-size:13px;"></i></div>
+          <div>
+            <div class="ai-chat-name">ShopMetrics IA Advisor</div>
+            <div class="ai-chat-status">Activo</div>
+          </div>
+        </div>
+        <div class="ai-chat-messages">
+          <div class="msg user">
+            <div class="msg-bubble">¿Cuáles son mis clientes con mayor riesgo de abandono y qué debería hacer?</div>
+          </div>
+          <div class="msg ai">
+            <div class="msg-bubble">He analizado tus datos de los últimos 90 días. Identifico <strong>347 clientes en riesgo alto</strong> (segmento At Risk): compraban cada 2 semanas y llevan más de 45 días inactivos...</div>
+          </div>
+          <div class="msg user">
+            <div class="msg-bubble">¿Qué categorías debería potenciar este mes?</div>
+          </div>
+          <div class="msg ai">
+            <div class="msg-bubble">Según el margen y volumen de ventas, <strong>Frutas y Verduras</strong> tiene el mejor ratio. Bebidas muestra una caída del 12% este mes y puede necesitar una acción promocional...</div>
+          </div>
+          <div class="msg ai">
+            <div class="typing">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-features reveal-right">
+        <div class="reveal delay-1">
+          <div class="section-tag">IA Advisor</div>
+          <h2 class="section-title">Tu analista de negocio<br/><span class="grad">siempre disponible</span></h2>
+          <p class="section-sub">Powered by Mistral AI. Hace preguntas en lenguaje natural y recibe análisis profundos basados en tus datos reales.</p>
+        </div>
+        <div class="ai-feature-item reveal delay-2">
+          <div class="ai-feature-icon"><i class="fas fa-comments"></i></div>
+          <div class="ai-feature-text">
+            <strong>Lenguaje natural</strong>
+            <p>Pregunta como hablarías con un analista. Sin queries, sin fórmulas. El sistema entiende el contexto de tu negocio.</p>
+          </div>
+        </div>
+        <div class="ai-feature-item reveal delay-3">
+          <div class="ai-feature-icon"><i class="fas fa-database"></i></div>
+          <div class="ai-feature-text">
+            <strong>Análisis contextual</strong>
+            <p>La IA tiene acceso a todos tus KPIs, segmentos RFM, tendencias de categorías e inventario para dar respuestas precisas.</p>
+          </div>
+        </div>
+        <div class="ai-feature-item reveal delay-4">
+          <div class="ai-feature-icon"><i class="fas fa-file-export"></i></div>
+          <div class="ai-feature-text">
+            <strong>Recomendaciones en los informes</strong>
+            <p>Al exportar cualquier informe, la IA genera automáticamente recomendaciones estratégicas personalizadas basadas en tus datos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── EXPORT SECTION ─── -->
+<section id="export" class="export-section">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center; max-width:560px; margin:0 auto 56px;">
+      <div class="section-tag">Exportación</div>
+      <h2 class="section-title">Informes profesionales<br/><span class="grad">en 3 formatos</span></h2>
+      <p class="section-sub" style="margin:16px auto 0;">Comparte tus análisis con tu equipo o dirección en el formato que necesites, siempre con recomendaciones generadas por IA.</p>
+    </div>
+    <div class="export-cards">
+      <div class="export-card reveal delay-1">
+        <div class="export-icon" style="background:rgba(56,189,248,0.1);color:#38bdf8;">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="export-name">HTML</div>
+        <p class="export-desc">Informe interactivo con diseño profesional. Ideal para compartir por email o subir a una intranet. Visualizable en cualquier navegador.</p>
+        <div class="export-tags">
+          <span class="export-tag">Interactivo</span>
+          <span class="export-tag">Ligero</span>
+          <span class="export-tag">Sin software</span>
+        </div>
+      </div>
+      <div class="export-card reveal delay-2">
+        <div class="export-icon" style="background:rgba(248,113,113,0.1);color:#f87171;">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="export-name">PDF</div>
+        <p class="export-desc">Documento listo para imprimir o presentar. Formato estándar para informes ejecutivos y auditorías. Generado directamente desde el navegador.</p>
+        <div class="export-tags">
+          <span class="export-tag">Imprimible</span>
+          <span class="export-tag">Universal</span>
+          <span class="export-tag">Ejecutivo</span>
+        </div>
+      </div>
+      <div class="export-card reveal delay-3">
+        <div class="export-icon" style="background:rgba(52,211,153,0.1);color:#34d399;">
+          <i class="fas fa-file-excel"></i>
+        </div>
+        <div class="export-name">Excel</div>
+        <p class="export-desc">Datos estructurados en múltiples hojas: KPIs, segmentos RFM, predicción de churn, categorías e inventario. Listo para análisis adicional.</p>
+        <div class="export-tags">
+          <span class="export-tag">Editable</span>
+          <span class="export-tag">Multi-hoja</span>
+          <span class="export-tag">Análisis propio</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FINAL CTA ─── -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-title reveal">
+      Empieza a tomar<br/>
+      <span style="background:linear-gradient(135deg,#818cf8,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">decisiones basadas en datos</span>
+    </h2>
+    <p class="cta-sub reveal delay-1">
+      Solo necesitas tu archivo CSV de ventas. En menos de un minuto tendrás tu primer análisis completo con segmentación RFM y predicción de churn.
+    </p>
+    <div class="cta-btns reveal delay-2">
+      <a href="pages/register.html" class="btn-hero-primary" style="font-size:16px; padding:15px 32px;">
+        <i class="fas fa-rocket"></i>
+        Crear cuenta gratuita
+      </a>
+      <a href="pages/login.html" class="btn-hero-secondary" style="font-size:16px; padding:15px 32px;">
+        <i class="fas fa-arrow-right-to-bracket"></i>
+        Ya tengo cuenta
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <div class="nav-logo-icon" style="width:28px;height:28px;border-radius:7px;">
+        <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="20" width="5" height="7" rx="1.5" fill="rgba(255,255,255,0.55)"/>
+          <rect x="13" y="14" width="5" height="13" rx="1.5" fill="rgba(255,255,255,0.8)"/>
+          <rect x="22" y="8" width="5" height="19" rx="1.5" fill="white"/>
+          <path d="M6.5 19.5 L15.5 13.5 L24.5 7.5" stroke="rgba(196,181,253,0.85)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="footer-logo-text">ShopMetrics AI</span>
+    </a>
+    <div class="footer-copy">Trabajo de Fin de Máster — 2024/2025</div>
+    <div class="footer-links">
+      <a href="pages/login.html">Acceder</a>
+      <a href="pages/register.html">Registrarse</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ─── NAVBAR SCROLL EFFECT ───
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // ─── SCROLL REVEAL ───
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+    revealObserver.observe(el);
+  });
+
+  // ─── ANIMATED COUNTERS ───
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1400;
+    const start = performance.now();
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNums = entry.target.querySelectorAll('.stat-num[data-target]');
+        statNums.forEach(el => animateCounter(el));
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const statsBar = document.querySelector('.stats-bar');
+  if (statsBar) counterObserver.observe(statsBar);
+
+  // ─── SMOOTH SCROLL FOR NAV LINKS ───
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+</body>
+</html>

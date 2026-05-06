@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supermarket BI — Inventory</title>
+    <title>ShopMetrics AI — Inventory</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -83,7 +84,7 @@
                             <i class="fas fa-search-dollar" style="color:var(--blue); margin-right:4px;"></i> <b>Cómo leer la Matriz de Inventario:</b><br><br>
                             • <b>Eje X (Derecha a Izquierda):</b> El Margen de Ganancia. Las burbujas a la izquierda del cero son productos que generan pérdidas netas cada vez que se venden.<br>
                             • <b>Eje Y (Arriba a Abajo):</b> Exposición en Ventas. Más arriba significa que ese ítem mueve mucho flujo de efectivo.<br>
-                            • <b>Las Burbujas Críticas 🚨:</b> Fíjate profundamente en los ítems arrinconados en la esquina <b>Superior-Izquierda</b>: Se venden en gran volumen pero roban dinero a la empresa por su margen negativo.
+                            • <b>Las Burbujas Críticas:</b> Fíjate profundamente en los ítems arrinconados en la esquina <b>Superior-Izquierda</b>: Se venden en gran volumen pero roban dinero a la empresa por su margen negativo.
                         </div>
                     </div>
                 </div>
@@ -135,7 +136,7 @@
                                 </td>
                                 <td class="mono">${item.order_count}</td>
                                 <td><span class="pill ${invStatusClass(item.status)}">${item.status}</span></td>
-                                <td>${item.is_critical ? '<span class="critical-alert">⚠️ BAJO MARGEN / ALTO VOLUMEN</span>' : '<span style="color:var(--text-muted)">—</span>'}</td>
+                                <td>${item.is_critical ? '<span class="critical-alert"><i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i>BAJO MARGEN / ALTO VOLUMEN</span>' : '<span style="color:var(--text-muted)">—</span>'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -153,6 +154,9 @@
             renderInventoryBubble(data.inventory);
             renderInventoryStatus(data.inventory);
             renderTreemap(data.inventory);
+
+            // Activar las cajas "cómo leer" como secciones desplegables
+            if (typeof initCollapsibles === 'function') initCollapsibles();
 
             document.getElementById('page-content').style.opacity = '1';
         }

@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopMetrics AI — Inteligencia para tu supermercado</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-base:       #0f1117;
+            --bg-surface:    #16181f;
+            --bg-card:       #1c1f2a;
+            --bg-card-hover: #222638;
+            --border:        rgba(255,255,255,0.07);
+            --border-accent: rgba(99,102,241,0.4);
+            --text-primary:  #f1f2f6;
+            --text-secondary:#8b8fa8;
+            --text-muted:    #4f5368;
+            --accent:        #6366f1;
+            --accent-light:  #818cf8;
+            --accent-glow:   rgba(99,102,241,0.15);
+            --green:         #10b981;
+            --green-light:   #34d399;
+            --green-bg:      rgba(16,185,129,0.1);
+            --amber:         #f59e0b;
+            --amber-bg:      rgba(245,158,11,0.1);
+            --blue:          #3b82f6;
+            --blue-bg:       rgba(59,130,246,0.1);
+            --red:           #ef4444;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+
+        /* ─── NAVBAR ─── */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 64px;
+            background: rgba(15,17,23,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+        .nav.scrolled {
+            background: rgba(15,17,23,0.97);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-brand-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .nav-brand-name {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .nav-brand-sub {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.04);
+        }
+        .nav-cta {
+            background: var(--accent);
+            color: #fff !important;
+            font-weight: 600 !important;
+        }
+        .nav-cta:hover {
+            background: var(--accent-light) !important;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Grid background */
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        /* Radial glow center */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse at center, rgba(99,102,241,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 780px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--accent-glow);
+            border: 1px solid var(--border-accent);
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-light);
+            margin-bottom: 28px;
+            letter-spacing: 0.3px;
+        }
+        .hero-badge i { font-size: 11px; }
+
+        .hero-title {
+            font-size: clamp(36px, 6vw, 68px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
+        }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent-light), #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(15px, 2vw, 18px);
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin: 0 auto 40px;
+            font-weight: 400;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 0 40px rgba(99,102,241,0.35);
+        }
+        .btn-hero-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(99,102,241,0.5);
+        }
+
+        .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Floating dashboard mockup */
+        .hero-visual {
+            position: relative;
+            z-index: 2;
+            margin-top: 64px;
+            width: 100%;
+            max-width: 860px;
+        }
+        .hero-mockup {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .mockup-bar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mockup-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .mockup-dot.red   { background: #ef4444; }
+        .mockup-dot.amber { background: #f59e0b; }
+        .mockup-dot.green { background: #10b981; }
+        .mockup-url {
+            margin-left: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 14px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            flex: 1;
+            max-width: 300px;
+        }
+        .mockup-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .mockup-kpi {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .mockup-kpi::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+        .mockup-kpi.c1::before { background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
+        .mockup-kpi.c2::before { background: var(--green); }
+        .mockup-kpi.c3::before { background: var(--amber); }
+        .mockup-kpi.c4::before { background: var(--blue); }
+        .mockup-kpi-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+        .mockup-kpi-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'DM Mono', monospace;
+        }
+        .mockup-kpi-delta {
+            font-size: 10px;
+            margin-top: 4px;
+        }
+        .mockup-kpi-delta.pos { color: var(--green); }
+        .mockup-kpi-delta.neg { color: var(--red); }
+        .mockup-charts {
+            padding: 0 20px 20px;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 12px;
+        }
+        .mockup-chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+        .mockup-chart-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        .mockup-chart-bars {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        .mockup-bar-item {
+            flex: 1;
+            border-radius: 3px 3px 0 0;
+            opacity: 0.85;
+        }
+        .mockup-segments {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .mockup-seg-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mockup-seg-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .mockup-seg-name {
+            font-size: 10px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .mockup-seg-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            width: 60px;
+            overflow: hidden;
+        }
+        .mockup-seg-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        /* ─── SECTION COMMON ─── */
+        section {
+            padding: 96px 24px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-light);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.8px;
+            margin-bottom: 14px;
+        }
+        .section-sub {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 560px;
+        }
+
+        /* ─── SCROLL REVEAL ─── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(36px);
+            transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-36px);
+            transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+        }
+        .reveal-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(36px);
+            transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+        }
+        .reveal-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .delay-1 { transition-delay: 0.1s !important; }
+        .delay-2 { transition-delay: 0.2s !important; }
+        .delay-3 { transition-delay: 0.3s !important; }
+        .delay-4 { transition-delay: 0.4s !important; }
+        .delay-5 { transition-delay: 0.5s !important; }
+
+        /* ─── FEATURES ─── */
+        .features {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 56px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent-glow);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .feature-icon.indigo  { background: var(--accent-glow); color: var(--accent-light); border: 1px solid var(--border-accent); }
+        .feature-icon.green   { background: var(--green-bg);    color: var(--green-light);  border: 1px solid rgba(16,185,129,0.3); }
+        .feature-icon.amber   { background: var(--amber-bg);    color: var(--amber);        border: 1px solid rgba(245,158,11,0.3); }
+        .feature-icon.blue    { background: var(--blue-bg);     color: var(--blue);         border: 1px solid rgba(59,130,246,0.3); }
+        .feature-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .feature-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            position: relative;
+        }
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 14px;
+            position: relative;
+        }
+        .fpill {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            border: 1px solid;
+        }
+        .fpill.indigo { background: var(--accent-glow); color: var(--accent-light); border-color: var(--border-accent); }
+        .fpill.green  { background: var(--green-bg);    color: var(--green-light);  border-color: rgba(16,185,129,0.3); }
+        .fpill.amber  { background: var(--amber-bg);    color: var(--amber);        border-color: rgba(245,158,11,0.3); }
+        .fpill.blue   { background: var(--blue-bg);     color: var(--blue);         border-color: rgba(59,130,246,0.3); }
+
+        /* ─── HOW IT WORKS ─── */
+        .how-it-works { background: var(--bg-base); }
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 56px;
+            position: relative;
+        }
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: calc(16.66% + 20px);
+            right: calc(16.66% + 20px);
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+            opacity: 0.3;
+        }
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            transition: all 0.25s;
+        }
+        .step-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+        }
+        .step-number {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 2px solid var(--border-accent);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'DM Mono', monospace;
+            color: var(--accent-light);
+            margin: 0 auto 18px;
+        }
+        .step-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .step-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .step-icon {
+            font-size: 28px;
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        /* ─── CSV REQUIREMENTS ─── */
+        .csv-section {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .csv-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            align-items: center;
+            margin-top: 56px;
+        }
+        .csv-columns-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .csv-col-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            transition: all 0.15s;
+        }
+        .csv-col-item:hover {
+            border-color: var(--border-accent);
+            background: var(--bg-card-hover);
+        }
+        .csv-col-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .csv-col-name {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .csv-col-type {
+            margin-left: auto;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .csv-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .csv-preview-header {
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .csv-preview-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .csv-preview-badge {
+            background: var(--green-bg);
+            color: var(--green-light);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 100px;
+            margin-left: auto;
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+        .csv-code {
+            padding: 20px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            line-height: 2;
+            overflow-x: auto;
+        }
+        .csv-code .header-row {
+            color: var(--accent-light);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            display: block;
+            white-space: nowrap;
+        }
+        .csv-code .data-row {
+            color: var(--text-secondary);
+            display: block;
+            white-space: nowrap;
+        }
+        .csv-code .data-row:hover {
+            color: var(--text-primary);
+        }
+        .csv-hint {
+            margin-top: 16px;
+            background: var(--amber-bg);
+            border: 1px solid rgba(245,158,11,0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--amber);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .csv-hint i { margin-top: 1px; flex-shrink: 0; }
+
+        /* ─── STATS ─── */
+        .stats-section {
+            background: var(--bg-base);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 56px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px 24px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-3px);
+        }
+        .stat-value {
+            font-size: 42px;
+            font-weight: 800;
+            font-family: 'DM Mono', monospace;
+            background: linear-gradient(135deg, var(--accent-light), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .stat-icon {
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* ─── CTA FINAL ─── */
+        .cta-section {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 100px 24px;
+        }
+        .cta-glow {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 28px;
+        }
+        .cta-glow-ring {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 2px solid var(--border-accent);
+            display: grid;
+            place-items: center;
+            font-size: 32px;
+            color: var(--accent-light);
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(99,102,241,0.3);
+            animation: pulse-ring 3s ease-in-out infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { box-shadow: 0 0 30px rgba(99,102,241,0.2); }
+            50%       { box-shadow: 0 0 70px rgba(99,102,241,0.45); }
+        }
+        .cta-title {
+            font-size: clamp(30px, 4vw, 50px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+        .cta-sub {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 480px;
+            margin: 0 auto 40px;
+        }
+        .cta-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            background: var(--bg-base);
+            border-top: 1px solid var(--border);
+            padding: 32px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .footer-brand-icon {
+            width: 26px; height: 26px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+        }
+        .footer-copy {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .nav-links .nav-link:not(.nav-cta) { display: none; }
+            .hero { padding: 100px 20px 60px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .steps-grid::before { display: none; }
+            .csv-layout { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
+            .mockup-body { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="nav" id="navbar">
+        <a href="/landing.html" class="nav-brand">
+            <div class="nav-brand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32">
+                    <rect x="3" y="19" width="5" height="7" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+                    <rect x="11" y="13" width="5" height="13" rx="1.5" fill="rgba(255,255,255,0.78)"/>
+                    <rect x="19" y="7" width="5" height="19" rx="1.5" fill="white"/>
+                    <path d="M5.5 19.5 L13.5 13.5 L21.5 7.5" stroke="rgba(196,181,253,0.9)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="21.5" cy="7.5" r="2.2" fill="#c4b5fd"/>
+                </svg>
+            </div>
+            <div>
+                <div class="nav-brand-name">ShopMetrics AI</div>
+                <div class="nav-brand-sub">Analytics Platform</div>
+            </div>
+        </a>
+        <div class="nav-links">
+            <a href="#features"     class="nav-link">Funciones</a>
+            <a href="#how-it-works" class="nav-link">Cómo funciona</a>
+            <a href="#csv"          class="nav-link">Requisitos CSV</a>
+            <a href="/pages/login.html"    class="nav-link">Iniciar sesión</a>
+            <a href="/pages/register.html" class="nav-link nav-cta">Empezar gratis</a>
+        </div>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge reveal">
+                <i class="fas fa-robot"></i>
+                Powered by Machine Learning
+            </div>
+
+            <h1 class="hero-title reveal delay-1">
+                Transforma las ventas de tu<br>
+                <span class="highlight">supermercado en inteligencia</span>
+            </h1>
+
+            <p class="hero-subtitle reveal delay-2">
+                Sube tu CSV de transacciones y obtén segmentación de clientes,
+                predicción de churn, previsión de ventas y análisis de inventario
+                — todo en segundos con IA.
+            </p>
+
+            <div class="hero-actions reveal delay-3">
+                <a href="/pages/register.html" class="btn-hero-primary">
+                    <i class="fas fa-rocket"></i>
+                    Empezar gratis
+                </a>
+                <a href="/pages/login.html" class="btn-hero-secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar sesión
+                </a>
+            </div>
+        </div>
+
+        <!-- Dashboard mockup -->
+        <div class="hero-visual reveal delay-4">
+            <div class="hero-mockup">
+                <div class="mockup-bar">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot amber"></div>
+                    <div class="mockup-dot green"></div>
+                    <div class="mockup-url">localhost:5050 — ShopMetrics AI Dashboard</div>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-kpi c1">
+                        <div class="mockup-kpi-label">Ventas Totales</div>
+                        <div class="mockup-kpi-value">$322K</div>
+                        <div class="mockup-kpi-delta pos"><i class="fas fa-arrow-up"></i> +12.4%</div>
+                    </div>
+                    <div class="mockup-kpi c2">
+                        <div class="mockup-kpi-label">Clientes Únicos</div>
+                        <div class="mockup-kpi-value">1,001</div>
+                        <div class="mockup-kpi-delta pos"><i class="fas fa-arrow-up"></i> +8.1%</div>
+                    </div>
+                    <div class="mockup-kpi c3">
+                        <div class="mockup-kpi-label">Ticket Medio</div>
+                        <div class="mockup-kpi-value">$322</div>
+                        <div class="mockup-kpi-delta neg"><i class="fas fa-arrow-down"></i> -2.3%</div>
+                    </div>
+                    <div class="mockup-kpi c4">
+                        <div class="mockup-kpi-label">Riesgo Churn</div>
+                        <div class="mockup-kpi-value">18%</div>
+                        <div class="mockup-kpi-delta pos"><i class="fas fa-arrow-down"></i> -4.7%</div>
+                    </div>
+                </div>
+                <div class="mockup-charts">
+                    <div class="mockup-chart-card">
+                        <div class="mockup-chart-title"><i class="fas fa-chart-bar" style="color:var(--accent-light);margin-right:5px"></i> Ventas por categoría</div>
+                        <div class="mockup-chart-bars">
+                            <div class="mockup-bar-item" style="height:70%; background:var(--accent);"></div>
+                            <div class="mockup-bar-item" style="height:55%; background:var(--green);"></div>
+                            <div class="mockup-bar-item" style="height:85%; background:var(--accent-light);"></div>
+                            <div class="mockup-bar-item" style="height:45%; background:var(--amber);"></div>
+                            <div class="mockup-bar-item" style="height:60%; background:var(--blue);"></div>
+                            <div class="mockup-bar-item" style="height:75%; background:var(--accent);"></div>
+                        </div>
+                    </div>
+                    <div class="mockup-chart-card">
+                        <div class="mockup-chart-title"><i class="fas fa-users" style="color:var(--green-light);margin-right:5px"></i> Segmentos RFM</div>
+                        <div class="mockup-segments">
+                            <div class="mockup-seg-item">
+                                <div class="mockup-seg-dot" style="background:var(--green)"></div>
+                                <div class="mockup-seg-name">Champions</div>
+                                <div class="mockup-seg-bar"><div class="mockup-seg-fill" style="width:70%;background:var(--green)"></div></div>
+                            </div>
+                            <div class="mockup-seg-item">
+                                <div class="mockup-seg-dot" style="background:var(--blue)"></div>
+                                <div class="mockup-seg-name">Promising</div>
+                                <div class="mockup-seg-bar"><div class="mockup-seg-fill" style="width:45%;background:var(--blue)"></div></div>
+                            </div>
+                            <div class="mockup-seg-item">
+                                <div class="mockup-seg-dot" style="background:var(--amber)"></div>
+                                <div class="mockup-seg-name">At Risk</div>
+                                <div class="mockup-seg-bar"><div class="mockup-seg-fill" style="width:30%;background:var(--amber)"></div></div>
+                            </div>
+                            <div class="mockup-seg-item">
+                                <div class="mockup-seg-dot" style="background:var(--red)"></div>
+                                <div class="mockup-seg-name">Hibernating</div>
+                                <div class="mockup-seg-bar"><div class="mockup-seg-fill" style="width:18%;background:var(--red)"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label"><i class="fas fa-sparkles"></i> Módulos de análisis</div>
+                <h2 class="section-title">Todo lo que necesitas,<br>en un solo dashboard</h2>
+                <p class="section-sub">Cuatro motores de IA trabajando juntos para convertir tus datos de ventas en acción real.</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- RFM -->
+                <div class="feature-card reveal delay-1">
+                    <div class="feature-icon indigo"><i class="fas fa-users-cog"></i></div>
+                    <div class="feature-title">Segmentación RFM</div>
+                    <p class="feature-desc">
+                        Clasifica automáticamente a tus clientes según Recencia, Frecuencia y Valor monetario.
+                        Identifica tus Champions, clientes Prometedores, en Riesgo e Hibernando.
+                    </p>
+                    <div class="feature-pills">
+                        <span class="fpill indigo">Champions</span>
+                        <span class="fpill green">Promising</span>
+                        <span class="fpill amber">At Risk</span>
+                        <span class="fpill blue">Hibernating</span>
+                    </div>
+                </div>
+
+                <!-- Churn -->
+                <div class="feature-card reveal delay-2">
+                    <div class="feature-icon green"><i class="fas fa-shield-alt"></i></div>
+                    <div class="feature-title">Predicción de Churn</div>
+                    <p class="feature-desc">
+                        Detecta qué clientes están en riesgo de abandonarte antes de que sea tarde.
+                        Modelo de Machine Learning entrenado sobre tus propios datos con métricas de precisión.
+                    </p>
+                    <div class="feature-pills">
+                        <span class="fpill green">Random Forest</span>
+                        <span class="fpill indigo">Probabilidad %</span>
+                        <span class="fpill amber">Alertas</span>
+                    </div>
+                </div>
+
+                <!-- Forecast -->
+                <div class="feature-card reveal delay-3">
+                    <div class="feature-icon amber"><i class="fas fa-chart-line"></i></div>
+                    <div class="feature-title">Previsión de Ventas</div>
+                    <p class="feature-desc">
+                        Anticipa la demanda futura con series temporales y modelos predictivos.
+                        Visualiza tendencias históricas y proyecciones con intervalos de confianza.
+                    </p>
+                    <div class="feature-pills">
+                        <span class="fpill amber">Time Series</span>
+                        <span class="fpill indigo">Forecast 30d</span>
+                        <span class="fpill blue">Tendencias</span>
+                    </div>
+                </div>
+
+                <!-- Inventory -->
+                <div class="feature-card reveal delay-4">
+                    <div class="feature-icon blue"><i class="fas fa-boxes"></i></div>
+                    <div class="feature-title">Análisis de Inventario</div>
+                    <p class="feature-desc">
+                        Descubre qué productos generan más margen, cuáles rotan menos y dónde optimizar
+                        el stock. Treemaps y rankings actualizados con cada análisis.
+                    </p>
+                    <div class="feature-pills">
+                        <span class="fpill blue">Top Productos</span>
+                        <span class="fpill green">Margen bruto</span>
+                        <span class="fpill amber">Rotación</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="reveal" style="text-align:center; margin-bottom:0;">
+                <div class="section-label" style="justify-content:center"><i class="fas fa-route"></i> Proceso</div>
+                <h2 class="section-title" style="text-align:center">De datos a decisiones<br>en tres pasos</h2>
+                <p class="section-sub" style="text-align:center; margin: 0 auto;">Sin configuración compleja. Sin conocimientos técnicos necesarios.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card reveal delay-1">
+                    <i class="fas fa-cloud-upload-alt step-icon" style="color:var(--accent-light)"></i>
+                    <div class="step-number">01</div>
+                    <div class="step-title">Sube tu CSV</div>
+                    <p class="step-desc">
+                        Arrastra y suelta tu archivo de ventas o transacciones en formato CSV.
+                        Soporta exportaciones directas de la mayoría de TPV y sistemas de caja.
+                    </p>
+                </div>
+                <div class="step-card reveal delay-2">
+                    <i class="fas fa-robot step-icon" style="color:var(--green-light)"></i>
+                    <div class="step-number">02</div>
+                    <div class="step-title">La IA lo analiza</div>
+                    <p class="step-desc">
+                        Los modelos de Machine Learning procesan automáticamente tus datos:
+                        limpieza, estandarización, segmentación RFM, churn y forecast.
+                    </p>
+                </div>
+                <div class="step-card reveal delay-3">
+                    <i class="fas fa-chart-pie step-icon" style="color:var(--amber)"></i>
+                    <div class="step-number">03</div>
+                    <div class="step-title">Obtén insights</div>
+                    <p class="step-desc">
+                        Accede a tu dashboard interactivo con KPIs, gráficos y tablas.
+                        Exporta informes o navega por cada módulo de análisis.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CSV REQUIREMENTS ── -->
+    <section class="csv-section" id="csv">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label"><i class="fas fa-file-csv"></i> Formato de datos</div>
+                <h2 class="section-title">¿Qué necesita<br>tu archivo CSV?</h2>
+                <p class="section-sub">
+                    Tu CSV debe incluir estas columnas para que todos los módulos funcionen correctamente.
+                    El sistema estandariza nombres de columnas automáticamente.
+                </p>
+            </div>
+
+            <div class="csv-layout">
+                <!-- Columnas requeridas -->
+                <div class="reveal-left">
+                    <div class="csv-columns-grid">
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--accent)"></div>
+                            <div class="csv-col-name">invoice_id</div>
+                            <div class="csv-col-type">ID</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--accent)"></div>
+                            <div class="csv-col-name">date</div>
+                            <div class="csv-col-type">Fecha</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--green)"></div>
+                            <div class="csv-col-name">branch</div>
+                            <div class="csv-col-type">Texto</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--green)"></div>
+                            <div class="csv-col-name">city</div>
+                            <div class="csv-col-type">Texto</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--blue)"></div>
+                            <div class="csv-col-name">customer_type</div>
+                            <div class="csv-col-type">Categórico</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--blue)"></div>
+                            <div class="csv-col-name">gender</div>
+                            <div class="csv-col-type">Categórico</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--amber)"></div>
+                            <div class="csv-col-name">product_line</div>
+                            <div class="csv-col-type">Categórico</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--amber)"></div>
+                            <div class="csv-col-name">unit_price</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--accent)"></div>
+                            <div class="csv-col-name">quantity</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--accent)"></div>
+                            <div class="csv-col-name">sales / total</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--green)"></div>
+                            <div class="csv-col-name">payment</div>
+                            <div class="csv-col-type">Texto</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--green)"></div>
+                            <div class="csv-col-name">gross_income</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--blue)"></div>
+                            <div class="csv-col-name">cogs</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                        <div class="csv-col-item">
+                            <div class="csv-col-dot" style="background:var(--blue)"></div>
+                            <div class="csv-col-name">rating</div>
+                            <div class="csv-col-type">Número</div>
+                        </div>
+                    </div>
+
+                    <div class="csv-hint" style="margin-top:16px">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>El sistema detecta automáticamente variantes de nombres como <code style="font-family:'DM Mono',monospace;font-size:11px">Sales</code>, <code style="font-family:'DM Mono',monospace;font-size:11px">Total</code> o <code style="font-family:'DM Mono',monospace;font-size:11px">Invoice ID</code>. Compatible con exportaciones de la mayoría de TPV del mercado.</span>
+                    </div>
+                </div>
+
+                <!-- Preview CSV -->
+                <div class="reveal-right">
+                    <div class="csv-preview">
+                        <div class="csv-preview-header">
+                            <i class="fas fa-file-csv" style="color:var(--green-light)"></i>
+                            <span class="csv-preview-title">SuperMarket_Analysis.csv</span>
+                            <span class="csv-preview-badge">✓ Formato válido</span>
+                        </div>
+                        <div class="csv-code">
+                            <span class="header-row">Invoice ID,Branch,City,Customer type,Gender,Product line,Unit price,Quantity,Sales,Date,Payment,cogs,gross income,Rating</span>
+                            <span class="data-row">750-67-8428,A,Yangon,Member,Female,Health...,74.69,7,548.97,1/5/2019,Ewallet,522.83,26.14,9.1</span>
+                            <span class="data-row">226-31-3081,B,Naypyitaw,Normal,Female,Electronics,15.28,5,80.22,3/8/2019,Cash,76.4,3.82,9.6</span>
+                            <span class="data-row">631-41-3108,A,Yangon,Normal,Female,Home...,46.33,7,340.52,3/3/2019,Credit card,324.31,16.21,7.4</span>
+                            <span class="data-row" style="color:var(--text-muted);font-style:italic">... más filas</span>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+                            <i class="fas fa-check-circle" style="color:var(--green);font-size:16px;flex-shrink:0"></i>
+                            <div>
+                                <div style="font-size:12px;font-weight:600">Separador: coma</div>
+                                <div style="font-size:11px;color:var(--text-muted)">CSV estándar</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+                            <i class="fas fa-check-circle" style="color:var(--green);font-size:16px;flex-shrink:0"></i>
+                            <div>
+                                <div style="font-size:12px;font-weight:600">Fecha: MM/DD/YYYY</div>
+                                <div style="font-size:11px;color:var(--text-muted)">u otros formatos</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+                            <i class="fas fa-check-circle" style="color:var(--green);font-size:16px;flex-shrink:0"></i>
+                            <div>
+                                <div style="font-size:12px;font-weight:600">Mín. 50 filas</div>
+                                <div style="font-size:11px;color:var(--text-muted)">Para ML fiable</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+                            <i class="fas fa-check-circle" style="color:var(--green);font-size:16px;flex-shrink:0"></i>
+                            <div>
+                                <div style="font-size:12px;font-weight:600">Encoding: UTF-8</div>
+                                <div style="font-size:11px;color:var(--text-muted)">o latin-1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── STATS ── -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="reveal" style="text-align:center;margin-bottom:0">
+                <div class="section-label" style="justify-content:center"><i class="fas fa-bolt"></i> Por qué ShopMetrics AI</div>
+                <h2 class="section-title" style="text-align:center">Análisis completo<br>desde el primer upload</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card reveal delay-1">
+                    <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Módulos de análisis IA</div>
+                </div>
+                <div class="stat-card reveal delay-2">
+                    <div class="stat-icon"><i class="fas fa-table-columns"></i></div>
+                    <div class="stat-value">17</div>
+                    <div class="stat-label">Columnas procesadas</div>
+                </div>
+                <div class="stat-card reveal delay-3">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Segmentos de clientes RFM</div>
+                </div>
+                <div class="stat-card reveal delay-4">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value">&lt;30<span style="font-size:22px">s</span></div>
+                    <div class="stat-label">Tiempo de análisis completo</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA FINAL ── -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="reveal">
+                <div class="cta-glow">
+                    <div class="cta-glow-ring">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                </div>
+                <h2 class="cta-title">¿Listo para<br>conocer tu negocio?</h2>
+                <p class="cta-sub">
+                    Regístrate gratis, sube tu CSV y empieza a tomar
+                    decisiones basadas en datos en menos de un minuto.
+                </p>
+                <div class="cta-buttons">
+                    <a href="/pages/register.html" class="btn-hero-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Crear cuenta gratis
+                    </a>
+                    <a href="/pages/login.html" class="btn-hero-secondary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Ya tengo cuenta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer class="footer">
+        <div class="footer-brand">
+            <div class="footer-brand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 32 32">
+                    <rect x="3" y="19" width="5" height="7" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+                    <rect x="11" y="13" width="5" height="13" rx="1.5" fill="rgba(255,255,255,0.78)"/>
+                    <rect x="19" y="7" width="5" height="19" rx="1.5" fill="white"/>
+                </svg>
+            </div>
+            <span><strong style="color:var(--text-primary)">ShopMetrics AI</strong> — Analytics Platform</span>
+        </div>
+        <div class="footer-copy">© 2026 ShopMetrics AI · Todos los derechos reservados</div>
+    </footer>
+
+    <script>
+        // ── Navbar scroll effect ──
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 20);
+        }, { passive: true });
+
+        // ── Redirect if already logged in ──
+        const user = localStorage.getItem('sm_user');
+        if (user) {
+            // Logged-in users see a subtle "Go to dashboard" link
+            const loginLink = document.querySelector('.nav-link[href="/pages/login.html"]');
+            if (loginLink) {
+                loginLink.textContent = 'Mi dashboard';
+                loginLink.href = '/index.html';
+            }
+        }
+
+        // ── Intersection Observer for reveal animations ──
+        const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -40px 0px'
+        });
+        revealEls.forEach(el => observer.observe(el));
+
+        // ── Smooth nav link scrolling ──
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // ── Counter animation for stats ──
+        function animateCount(el, target, suffix = '') {
+            const duration = 1500;
+            const start = performance.now();
+            const isDecimal = String(target).includes('.');
+            function update(now) {
+                const elapsed = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - elapsed, 3);
+                const val = isDecimal
+                    ? (eased * target).toFixed(1)
+                    : Math.round(eased * target);
+                el.setAttribute('data-display', val + suffix);
+                if (elapsed < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Observe stat cards for counter
+        const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const valueEl = entry.target.querySelector('.stat-value');
+                    statObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.stat-card').forEach(card => statObserver.observe(card));
+    </script>
+</body>
+</html>

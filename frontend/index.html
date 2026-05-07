@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Redirige a la landing si el usuario no está autenticado -->
+    <script>
+        if (!localStorage.getItem('sm_user')) {
+            window.location.replace('/landing.html');
+        }
+    </script>
     <title>ShopMetrics AI — Upload</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <!-- Fonts & Icons -->

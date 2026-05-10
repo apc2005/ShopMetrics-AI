@@ -26,16 +26,16 @@
 
 <body>
     <main class="main" id="main-content">
-        <script>
+                <script>
             document.addEventListener('DOMContentLoaded', () => {
-                renderTopbar('Executive Summary', 'Loading data...');
+                renderTopbar('Resumen Ejecutivo', 'Cargando datos...');
                 loadOverviewData();
             });
         </script>
         <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
             <!-- KPIs -->
-            <div class="section-header">
-                <div class="section-title">Overview <span class="section-sub">Real-time KPIs</span></div>
+<div class="section-header">
+                <div class="section-title">Resumen <span class="section-sub">KPIs en tiempo real</span></div>
             </div>
             <div class="kpi-grid" id="kpiContainer"></div>
 
@@ -43,8 +43,8 @@
             <div class="grid-1-2">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title"><i class="card-icon fas fa-chart-pie"></i> Segment Distribution</div>
-                        <span class="pill green"><i class="fas fa-circle" style="font-size:6px"></i> Live</span>
+                        <div class="card-title"><i class="card-icon fas fa-chart-pie"></i> Distribución de Segmentos</div>
+                        <span class="pill green"><i class="fas fa-circle" style="font-size:6px"></i> En vivo</span>
                     </div>
                     <div class="card-body">
                         <div class="donut-wrap" style="position:relative;max-width:200px;margin:0 auto">
@@ -67,18 +67,18 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title"><i class="card-icon fas fa-fire"></i> Top Churn Risk</div>
-                        <span class="pill red">High Priority</span>
+                        <div class="card-title"><i class="card-icon fas fa-fire"></i> Riesgo de Churn más alto</div>
+                        <span class="pill red">Prioridad alta</span>
                     </div>
                     <table id="churnTable" class="data-table">
                         <thead>
                             <tr>
-                                <th>Customer</th>
+                                <th>Cliente</th>
                                 <th>R</th>
                                 <th>F</th>
                                 <th>M</th>
-                                <th>Churn Risk</th>
-                                <th>Segment</th>
+                                <th>Riesgo de Churn</th>
+                                <th>Segmento</th>
                             </tr>
                         </thead>
                         <tbody id="churnTableBody"></tbody>
@@ -90,7 +90,7 @@
             <div class="grid-2-1">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title"><i class="card-icon fas fa-chart-line"></i> Sales Forecast
+                        <div class="card-title"><i class="card-icon fas fa-chart-line"></i> Pronóstico de ventas
                             <span class="section-sub" id="forecastMethod">—</span>
                         </div>
                         <div class="card-actions">
@@ -117,19 +117,19 @@
 <div class="mini-stats" style="margin-bottom:16px;display:flex;flex-direction:column;gap:12px;height:160px;">
                             <div class="mini-stat">
                                 <div class="mini-stat-val" style="color:var(--red)" id="churnKPIVal">—</div>
-                                <div class="mini-stat-label">Churn Rate</div>
+                                <div class="mini-stat-label">Tasa de Churn</div>
                             </div>
                             <div class="mini-stat">
                                 <div class="mini-stat-val" style="color:var(--green)" id="segmentsNumVal">4</div>
-                                <div class="mini-stat-label">RFM Groups</div>
+                                <div class="mini-stat-label">Grupos RFM</div>
                             </div>
                             <div class="mini-stat">
                                 <div class="mini-stat-val" style="color:var(--blue)" id="churnProbVal">—%</div>
-                                <div class="mini-stat-label">Avg Churn Prob</div>
+                                <div class="mini-stat-label">Prob. promedio de Churn</div>
                             </div>
     <div class="mini-stat">
         <div class="mini-stat-val" style="color:var(--accent)" id="topCatVal">—</div>
-        <div class="mini-stat-label">Top Categoría</div>
+        <div class="mini-stat-label">Categoría principal</div>
     </div>
                         </div>
                     </div>
@@ -169,7 +169,7 @@
                     <div class="seg-dot" style="background:${SEGMENT_COLORS[seg] || '#ccc'}"></div>
                     <div class="seg-info">
                         <div class="seg-name">${seg}</div>
-                        <div class="seg-pct">${((cnt / totalSeg) * 100).toFixed(0)}% of customers</div>
+                        <div class="seg-pct">${((cnt / totalSeg) * 100).toFixed(0)}% de clientes</div>
                     </div>
                     <div class="seg-count">${cnt.toLocaleString()}</div>
                 </div>
@@ -257,12 +257,12 @@
                 data: {
                     datasets: [
                         {
-                            label: 'Historical', data: histData,
+                            label: 'Histórico', data: histData,
                             borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)',
                             fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2
                         },
                         {
-                            label: 'Forecast', data: futData,
+                            label: 'Pronóstico', data: futData,
                             borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)',
                             fill: true, tension: 0.4, borderDash: [6, 4], pointRadius: 4, borderWidth: 2,
                             pointHoverRadius: 6,

@@ -1,5 +1,3 @@
-// Archivo de funciones compartidas que se cargan en todas las páginas
-
 // Muestra mensajes emergentes en vez de los alert() del navegador
 function showToast(message, type = 'info', duration = 4000) {
     let container = document.getElementById('sm-toast-container');
@@ -476,54 +474,54 @@ function renderSidebar() {
                 </div>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-section-label">General</div>
+                    <div class="nav-section-label">General</div>
                 <a href="/index.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${activePage === 'index' || activePage === '' ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-upload"></i></span> New Upload
+<span class="nav-icon"><i class="fas fa-upload"></i></span> Nueva Carga
                     </div>
-                </a>
+</a>
                 <a href="/pages/history.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isHistory ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-history"></i></span> History
+                        <span class="nav-icon"><i class="fas fa-history"></i></span> Historial
                     </div>
                 </a>
                 <a href="/pages/settings.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isSettings ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-sliders-h"></i></span> Settings
+<span class="nav-icon"><i class="fas fa-sliders-h"></i></span> Configuración
                     </div>
                 </a>
 
                 <div class="nav-section-label">Dashboard View</div>
                 <a href="/pages/overview.html" class="nav-item-link" style="text-decoration:none;">
-                    <div class="nav-item ${isOverview ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-th-large"></i></span> Overview
+<div class="nav-item ${isOverview ? 'active' : ''}">
+                        <span class="nav-icon"><i class="fas fa-th-large"></i></span> Resumen
                     </div>
                 </a>
                 <a href="/pages/customers.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isCustomers ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-users"></i></span> Customers
+<span class="nav-icon"><i class="fas fa-users"></i></span> Clientes
                         <span class="badge" id="nav-badge-customers" style="display:none">—</span>
                     </div>
                 </a>
                 <a href="/pages/analytics.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isAnalytics ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-chart-line"></i></span> Analytics
+<span class="nav-icon"><i class="fas fa-chart-line"></i></span> Analítica
                     </div>
                 </a>
                 <a href="/pages/ai.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${activePage === 'ai' ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-robot"></i></span> AI Advisor
+<span class="nav-icon"><i class="fas fa-robot"></i></span> Asesor IA
                     </div>
                 </a>
                 <a href="/pages/inventory.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isInventory ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-box"></i></span> Inventory
+<span class="nav-icon"><i class="fas fa-box"></i></span> Inventario
                         <span class="badge" id="nav-badge-inventory" style="display:none">—</span>
                     </div>
                 </a>
                 <a href="/pages/transactions.html" class="nav-item-link" style="text-decoration:none;">
                     <div class="nav-item ${isTransactions ? 'active' : ''}">
-                        <span class="nav-icon"><i class="fas fa-receipt"></i></span> Transactions
+<span class="nav-icon"><i class="fas fa-receipt"></i></span> Transacciones
                     </div>
                 </a>
             </nav>

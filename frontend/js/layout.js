@@ -485,11 +485,7 @@ function renderSidebar() {
                         <span class="nav-icon"><i class="fas fa-history"></i></span> Historial
                     </div>
                 </a>
-                <a href="/pages/settings.html" class="nav-item-link" style="text-decoration:none;">
-                    <div class="nav-item ${isSettings ? 'active' : ''}">
-<span class="nav-icon"><i class="fas fa-sliders-h"></i></span> Configuración
-                    </div>
-                </a>
+
 
                 <div class="nav-section-label">Dashboard View</div>
                 <a href="/pages/overview.html" class="nav-item-link" style="text-decoration:none;">
@@ -534,12 +530,8 @@ function renderSidebar() {
                 <i class="fas fa-chevron-up" id="sidebar-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;"></i>
             </div>
             <div id="sidebar-user-menu" style="display:none;border-top:1px solid var(--border);padding:8px 12px;background:var(--bg-sidebar);">
-                <a href="/pages/settings.html" style="text-decoration:none;">
-                    <div style="display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:7px;color:var(--text-secondary);font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-                        <i class="fas fa-cog" style="width:14px;text-align:center;"></i> Configuración
-                    </div>
-                </a>
                 <div onclick="logout()" style="display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:7px;color:var(--red-light,#f87171);font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">
+
                     <i class="fas fa-sign-out-alt" style="width:14px;text-align:center;"></i> Cerrar sesión
                 </div>
             </div>

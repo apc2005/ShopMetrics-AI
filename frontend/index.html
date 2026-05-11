@@ -11,17 +11,14 @@
     </script>
     <title>ShopMetrics AI — Upload</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/index.css">
     <script src="/js/storage.js"></script>
     <script src="/js/layout.js"></script>
 </head>
 <body>
-    <!-- Sidebar is injected by layout.js automatically -->
     <main class="main">
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -30,7 +27,6 @@
         </script>
         
         <div class="content">
-            <!-- UPLOAD -->
             <div id="uploadSection" style="display: flex;">
                 <div class="upload-card" id="uploadArea">
                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
@@ -44,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- LOADING -->
                 <div id="loadingSection">
                     <div class="loading-animation">
                         <div class="loading-step active">
@@ -71,7 +66,6 @@
     </main>
 
     <script>
-        // Upload logic
         const fileInput2 = document.getElementById('csvFile2');
         const uploadArea = document.getElementById('uploadArea');
 
@@ -96,15 +90,12 @@
             uploadSection.style.display = 'none';
             loadingSection.style.display = 'flex';
             
-            // Update filename if available
             const filenameLabel = document.getElementById('topbar-filename');
             if(filenameLabel) filenameLabel.textContent = file.name;
 
-            // Step 1: Upload (2s delay simulation)
             setTimeout(() => steps[0].classList.remove('active'), 500);
             setTimeout(() => steps[1].classList.add('active'), 2000);
 
-            // Step 2: AI Analysis (real backend call after 2s)
             setTimeout(async () => {
                 const formData = new FormData();
                 formData.append('file', file);
@@ -120,7 +111,6 @@
                     const result = await response.json();
                     if (!response.ok) throw new Error(result.error || 'Error del servidor');
                     
-                    // Save analysis
                     await window.appStorage.saveAnalysis(file.name, result);
                     
                     steps[2].classList.remove('active');
@@ -128,7 +118,6 @@
                     
                     notifService.add('¡Análisis completado: ' + file.name, 'success');
                     
-                    // Redirect after success step
                     setTimeout(() => {
                         window.location.href = '/pages/overview.html';
                     }, 1500);

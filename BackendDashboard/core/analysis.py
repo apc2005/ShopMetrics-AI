@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-analysis.py — Análisis de negocio y Feature Engineering (RFM)
-"""
+
+# Análisis de negocio y Feature Engineering (RFM)
 
 import pandas as pd
 import numpy as np
-
 
 class BusinessAnalyzer:
     def __init__(self, df):
@@ -25,7 +23,6 @@ class BusinessAnalyzer:
         n_orders     = len(self.df)
         avg_order    = total_sales / n_orders if n_orders > 0 else 0
         
-        # NaN-proof
         kpis = {
             'Ventas Totales':       float(total_sales) if pd.notna(total_sales) else 0,
             'Beneficio Total':      float(total_profit) if pd.notna(total_profit) else 0,
@@ -47,7 +44,6 @@ class BusinessAnalyzer:
     def get_top_products(self, top_n=20):
         """Top products by total sales volume and order count for inventory analysis"""
         if 'product_name' not in self.df.columns:
-            # Fallback if no product_name - group by category only, ADD avg_sale
             fallback = self.df.groupby('product_category')['total_sales'].agg(['count', 'sum']).reset_index()
             fallback.columns = ['product_category', 'order_count', 'total_sales']
             fallback['product_name'] = 'N/A (Category)'
@@ -72,18 +68,18 @@ class BusinessAnalyzer:
             # Calcular Margen Porcentual
             top_prods['margin_pct'] = (top_prods['total_profit'] / top_prods['total_sales'] * 100).round(2)
             
-            # Lógica de Status mejorada para visualización (Semáforo)
+            # Lógica de Status mejorada para visualización
             q_high = top_prods['total_sales'].quantile(0.7)
             q_low = top_prods['total_sales'].quantile(0.3)
             
             def get_status(sales):
-                if sales >= q_high: return 'Star'          # Gran volumen
-                if sales <= q_low:  return 'Underperformer' # Baja rotación
-                return 'Stable'                           # Estable
+                if sales >= q_high: return 'Star'          
+                if sales <= q_low:  return 'Underperformer' 
+                return 'Stable'                           
             
             top_prods['status'] = top_prods['total_sales'].apply(get_status)
             
-            # Identificar "Productos de Riesgo" (Mucho volumen pero poco margen)
+            # Identificar Productos de Riesgo, que consisten en que tienen mucho volumen pero poco margen
             top_prods['is_critical'] = (top_prods['total_sales'] > q_high) & (top_prods['margin_pct'] < 5)
             
             # Clasificación ABC: A (Top 70% ventas), B (Siguiente 20%), C (Resto 10%)
@@ -115,7 +111,6 @@ class BusinessAnalyzer:
         return (self.df.groupby('region')[['total_sales', 'profit']]
                 .sum().round(2).reset_index())
 
-
 def _category_analysis(df: pd.DataFrame) -> pd.DataFrame:
     if "product_category" not in df.columns:
         return pd.DataFrame()
@@ -133,7 +128,6 @@ def _region_analysis(df: pd.DataFrame) -> pd.DataFrame:
             .round(2)
             .reset_index())
 
-
 def _monthly_sales(df: pd.DataFrame) -> pd.DataFrame:
     monthly = (df.groupby(df["date"].dt.to_period("M"))
                .agg(total_sales=("total_sales", "sum"),
@@ -142,7 +136,6 @@ def _monthly_sales(df: pd.DataFrame) -> pd.DataFrame:
                .reset_index())
     monthly["date"] = monthly["date"].dt.to_timestamp()
     return monthly.sort_values("date")
-
 
 def data_engineering_pipeline(df):
     snapshot_date = df['date'].max() + pd.Timedelta(days=1)
@@ -166,7 +159,6 @@ def data_engineering_pipeline(df):
         }
     )
 
-    # Force numeric types to fix log1p dtype error
     numeric_cols = ['Recency', 'Frequency', 'Monetary']
     for col in numeric_cols:
         if col in rfm.columns:

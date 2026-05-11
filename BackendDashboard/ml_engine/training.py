@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-models.py — Modelos de IA: segmentación KMeans, predicción de churn y forecasting
-"""
+
+# Modelos de IA: segmentación KMeans, predicción de churn y forecasting
 
 import pandas as pd
 import numpy as np
@@ -17,8 +16,6 @@ from sklearn.pipeline import Pipeline
 from config import RFM_LOG_FEATURES, N_CLUSTERS, RANDOM_STATE, CHURN_TEST_SIZE, FORECAST_PERIODS, MODEL_DIR
 from prophet import Prophet
 
-
-
 def _auto_label_clusters(rfm_df, labels):
     tmp = rfm_df.copy()
     tmp['_lbl'] = labels
@@ -32,15 +29,11 @@ def _auto_label_clusters(rfm_df, labels):
     business_labels = ['Champions', 'Promising', 'At Risk', 'Hibernating']
     return {cluster_id: business_labels[rank - 1] for cluster_id, rank in ranked.items()}
 
-
-
 def _save_model(obj, filename: str):
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     path = MODEL_DIR / filename
     joblib.dump(obj, path)
     print(f"Modelo guardado en: {path}")
-
-
 
 def _select_k_kmeans(X_scaled, k_min: int = 2, k_max_cap: int = 10, random_state: int = 42, n_init: int = 20):
     """Selecciona k para KMeans usando silhouette_score.
@@ -83,8 +76,6 @@ def _select_k_kmeans(X_scaled, k_min: int = 2, k_max_cap: int = 10, random_state
 
     return best
 
-
-
 def train_segmentation(rfm_df):
     features = [f for f in RFM_LOG_FEATURES if f in rfm_df.columns]
     X = rfm_df[features].fillna(0)
@@ -115,14 +106,12 @@ def train_segmentation(rfm_df):
     # Guardamos el silhouette del mejor k (evita recalcular)
     sil = sil_best
 
-
     rfm_df = rfm_df.copy()
     rfm_df['Segment_Cluster'] = labels
     rfm_df['Segment_Label']   = rfm_df['Segment_Cluster'].map(_auto_label_clusters(rfm_df, labels))
     rfm_df['Silhouette_Score'] = sil
     rfm_df['Chosen_K'] = k_selected
     rfm_df['Clustering_Method'] = method_sel
-
 
     _save_model({'kmeans': kmeans, 'scaler': scaler}, 'segmentation_model.pkl')
 
@@ -132,7 +121,6 @@ def train_segmentation(rfm_df):
                .round(2))
     print(summary.to_string())
     return rfm_df
-
 
 def train_churn_model(rfm_df):
     print('[Churn] Entrenando modelo de predicción de abandono…')
@@ -181,7 +169,7 @@ def train_churn_model(rfm_df):
         pipeline.named_steps['clf'].feature_importances_, index=feature_cols
     ).sort_values(ascending=False)
 
-    print('\n  --- TOP 10 VARIABLES MÁS IMPORTANTES ---')
+    print('\n Top 10 variables más importantes para predecir churn:')
     print(importances.head(10).to_string())
 
     _save_model(pipeline, 'churn_model.pkl')
@@ -201,7 +189,7 @@ def train_churn_model(rfm_df):
 print('Funciones de modelos ML listas')
 
 
-# ─── FALLBACK: Regresión Polinómica ────────────────────────────────────────
+# FALLBACK: Regresión Polinómica
 
 def _polynomial_forecast(monthly, periods):
     """Fallback: ajuste polinómico de grado 2 sobre el índice temporal."""
@@ -230,7 +218,7 @@ def _polynomial_forecast(monthly, periods):
     return pd.concat([hist_part, fut_part], ignore_index=True), 'polynomial_regression'
 
 
-# ─── FORECASTING PRINCIPAL (Prophet con fallback) ──────────────────────────
+# FORECASTING PRINCIPAL (Prophet con fallback) 
 
 def train_sales_forecast(clean_df):
     print('[Forecast] Construyendo previsión de ventas…')
@@ -259,7 +247,7 @@ def train_sales_forecast(clean_df):
         future   = model.make_future_dataframe(periods=FORECAST_PERIODS, freq='MS')
         forecast = model.predict(future)
         result_df = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].copy()
-        # Clamp negative predictions a 0
+
         for col in ['yhat', 'yhat_lower', 'yhat_upper']:
             result_df[col] = result_df[col].clip(lower=0)
         method = 'prophet'

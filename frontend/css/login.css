@@ -1,3 +1,5 @@
+/* Estilos de login */
+
 :root {
             --bg-base: #0f1117;
             --bg-card: #1c1f2a;
@@ -72,7 +74,6 @@
             margin-top: 2px;
         }
 
-        /* Card */
         .auth-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -150,7 +151,6 @@
         .btn-auth:active { transform: translateY(0); }
         .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* Error */
         .auth-error {
             background: var(--red-bg);
             border: 1px solid rgba(239,68,68,0.3);
@@ -165,7 +165,6 @@
         }
         .auth-error.show { display: flex; }
 
-        /* Footer */
         .auth-footer {
             text-align: center;
             margin-top: 20px;
@@ -179,7 +178,6 @@
         }
         .auth-footer a:hover { text-decoration: underline; }
 
-        /* Spinner */
         .spinner {
             width: 16px; height: 16px;
             border: 2px solid rgba(255,255,255,0.3);

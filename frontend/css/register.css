@@ -1,3 +1,5 @@
+/* Estilos de register */
+
 :root {
             --bg-base: #0f1117;
             --bg-card: #1c1f2a;
@@ -143,7 +145,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Success state */
         .auth-success {
             text-align: center; padding: 20px 0; display: none;
         }

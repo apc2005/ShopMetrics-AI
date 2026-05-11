@@ -9,10 +9,10 @@ with open('SuperMarket Analysis.csv', 'rb') as f:
 print('Status:', response.status_code)
 if response.status_code == 200:
     data = response.json()
-    print('Categories:')
+    print('Categorias:')
     print(data.get('categories', []))
     if data.get('categories'):
-        print('\nFirst few categories:')
+        print('\nPrimeras categorias:')
         for cat in data['categories'][:5]:
             print(cat)
 else:

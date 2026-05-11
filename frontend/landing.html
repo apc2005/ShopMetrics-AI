@@ -43,12 +43,10 @@
             line-height: 1.6;
         }
 
-        /* ─── SCROLLBAR ─── */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-base); }
         ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
 
-        /* ─── NAVBAR ─── */
         .nav {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -118,7 +116,6 @@
             background: var(--accent-light) !important;
         }
 
-        /* ─── HERO ─── */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -131,7 +128,6 @@
             overflow: hidden;
         }
 
-        /* Grid background */
         .hero::before {
             content: '';
             position: absolute;
@@ -143,7 +139,6 @@
             pointer-events: none;
         }
 
-        /* Radial glow center */
         .hero::after {
             content: '';
             position: absolute;
@@ -253,7 +248,6 @@
             transform: translateY(-2px);
         }
 
-        /* Floating dashboard mockup */
         .hero-visual {
             position: relative;
             z-index: 2;
@@ -403,7 +397,6 @@
             border-radius: 2px;
         }
 
-        /* ─── SECTION COMMON ─── */
         section {
             padding: 96px 24px;
         }
@@ -435,7 +428,6 @@
             max-width: 560px;
         }
 
-        /* ─── SCROLL REVEAL ─── */
         .reveal {
             opacity: 0;
             transform: translateY(36px);
@@ -469,7 +461,6 @@
         .delay-4 { transition-delay: 0.4s !important; }
         .delay-5 { transition-delay: 0.5s !important; }
 
-        /* ─── FEATURES ─── */
         .features {
             background: var(--bg-surface);
             border-top: 1px solid var(--border);
@@ -548,7 +539,6 @@
         .fpill.amber  { background: var(--amber-bg);    color: var(--amber);        border-color: rgba(245,158,11,0.3); }
         .fpill.blue   { background: var(--blue-bg);     color: var(--blue);         border-color: rgba(59,130,246,0.3); }
 
-        /* ─── HOW IT WORKS ─── */
         .how-it-works { background: var(--bg-base); }
         .steps-grid {
             display: grid;
@@ -608,7 +598,6 @@
             display: block;
         }
 
-        /* ─── CSV REQUIREMENTS ─── */
         .csv-section {
             background: var(--bg-surface);
             border-top: 1px solid var(--border);
@@ -726,7 +715,6 @@
         }
         .csv-hint i { margin-top: 1px; flex-shrink: 0; }
 
-        /* ─── STATS ─── */
         .stats-section {
             background: var(--bg-base);
         }
@@ -893,7 +881,6 @@
         </div>
     </nav>
 
-    <!-- ── HERO ── -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge reveal">
@@ -924,7 +911,6 @@
             </div>
         </div>
 
-        <!-- Dashboard mockup -->
         <div class="hero-visual reveal delay-4">
             <div class="hero-mockup">
                 <div class="mockup-bar">
@@ -997,7 +983,6 @@
         </div>
     </section>
 
-    <!-- ── FEATURES ── -->
     <section class="features" id="features">
         <div class="container">
             <div class="reveal">
@@ -1038,7 +1023,6 @@
                     </div>
                 </div>
 
-                <!-- Forecast -->
                 <div class="feature-card reveal delay-3">
                     <div class="feature-icon amber"><i class="fas fa-chart-line"></i></div>
                     <div class="feature-title">Previsión de Ventas</div>
@@ -1053,7 +1037,6 @@
                     </div>
                 </div>
 
-                <!-- Inventory -->
                 <div class="feature-card reveal delay-4">
                     <div class="feature-icon blue"><i class="fas fa-boxes"></i></div>
                     <div class="feature-title">Análisis de Inventario</div>
@@ -1071,7 +1054,6 @@
         </div>
     </section>
 
-    <!-- ── HOW IT WORKS ── -->
     <section class="how-it-works" id="how-it-works">
         <div class="container">
             <div class="reveal" style="text-align:center; margin-bottom:0;">
@@ -1112,7 +1094,6 @@
         </div>
     </section>
 
-    <!-- ── CSV REQUIREMENTS ── -->
     <section class="csv-section" id="csv">
         <div class="container">
             <div class="reveal">
@@ -1206,7 +1187,7 @@
                     </div>
                 </div>
 
-                <!-- Preview CSV -->
+                <!-- CSV -->
                 <div class="reveal-right">
                     <div class="csv-preview">
                         <div class="csv-preview-header">
@@ -1258,7 +1239,6 @@
         </div>
     </section>
 
-    <!-- ── STATS ── -->
     <section class="stats-section">
         <div class="container">
             <div class="reveal" style="text-align:center;margin-bottom:0">
@@ -1335,16 +1315,13 @@
     </footer>
 
     <script>
-        // ── Navbar scroll effect ──
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             navbar.classList.toggle('scrolled', window.scrollY > 20);
         }, { passive: true });
 
-        // ── Redirect if already logged in ──
         const user = localStorage.getItem('sm_user');
         if (user) {
-            // Logged-in users see a subtle "Go to dashboard" link
             const loginLink = document.querySelector('.nav-link[href="/pages/login.html"]');
             if (loginLink) {
                 loginLink.textContent = 'Mi dashboard';
@@ -1352,7 +1329,6 @@
             }
         }
 
-        // ── Intersection Observer for reveal animations ──
         const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1367,7 +1343,6 @@
         });
         revealEls.forEach(el => observer.observe(el));
 
-        // ── Smooth nav link scrolling ──
         document.querySelectorAll('a[href^="#"]').forEach(a => {
             a.addEventListener('click', e => {
                 const target = document.querySelector(a.getAttribute('href'));
@@ -1378,7 +1353,6 @@
             });
         });
 
-        // ── Counter animation for stats ──
         function animateCount(el, target, suffix = '') {
             const duration = 1500;
             const start = performance.now();
@@ -1395,7 +1369,6 @@
             requestAnimationFrame(update);
         }
 
-        // Observe stat cards for counter
         const statObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {

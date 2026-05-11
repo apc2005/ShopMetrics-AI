@@ -1,3 +1,5 @@
+/* Estilos de analytics */
+
 div.dataTables_wrapper div.dataTables_filter input,
         div.dataTables_wrapper div.dataTables_filter input[type=search] {
             background: var(--bg-surface) !important;

@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopMetrics AI — Customers</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <!-- Dependencies -->
+    <!-- Dependencas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/customers.css">
     <script src="/js/storage.js"></script>
@@ -156,7 +154,6 @@
                 }
             });
 
-            // Polar Area
             const pCtx = document.getElementById('segmentPolarChart').getContext('2d');
             const segCounts = {};
             data.rfm_segments.forEach(r => { const s = r.Segment_Label || 'Unknown'; segCounts[s] = (segCounts[s] || 0) + 1; });

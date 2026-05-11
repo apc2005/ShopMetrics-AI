@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopMetrics AI — Analytics</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <!-- Dependencies -->
+    <!-- Dependencias -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/analytics.css">
     <script src="/js/storage.js"></script>
@@ -31,7 +29,7 @@
         <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
             <div class="card" style="margin-bottom:20px;">
                 <div class="card-header">
-                    <div class="card-title"><i class="card-icon fas fa-chart-line"></i> Sales & Profit by Category</div>
+                    <div class="card-title"><i class="card-icon fas fa-chart-line"></i>Ventas & Beneficio por Categoria</div>
                     <span class="pill accent">Combo Chart</span>
                 </div>
                 <div class="card-body">
@@ -47,10 +45,10 @@
             
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title"><i class="card-icon fas fa-table"></i> Sales Details by Category</div>
+                    <div class="card-title"><i class="card-icon fas fa-table"></i> Detalles de ventas por Categoria</div>
                 </div>
                 <table class="data-table" id="analyticsTable">
-                    <thead><tr><th>Category</th><th>Sales</th><th>Profit</th></tr></thead>
+                    <thead><tr><th>Categorias</th><th>Ventas</th><th>Profit</th></tr></thead>
                     <tbody id="analyticsTableBody"></tbody>
                 </table>
             </div>
@@ -63,7 +61,6 @@
             if(!data) { window.location.href = '/index.html'; return; }
             document.getElementById('topbar-filename').textContent = data.filename;
 
-            // Sort descending by sales
             const cats = [...data.categories].sort((a,b) => b.total_sales - a.total_sales);
 
             document.getElementById('analyticsTableBody').innerHTML = cats.map(r => `

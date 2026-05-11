@@ -34,7 +34,6 @@
 
         <div class="content" id="page-content">
 
-            <!-- Section header -->
             <div class="section-header">
                 <div class="section-title">AI Advisor <span class="section-sub">Powered by Mistral AI</span></div>
                 <span class="pill green"><i class="fas fa-circle" style="font-size:6px"></i> Online</span>
@@ -42,10 +41,8 @@
 
             <div class="ai-layout">
 
-                <!-- LEFT: Input panel -->
                 <div class="ai-sidebar">
 
-                    <!-- Prompt card -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title"><i class="card-icon fas fa-comment-dots"></i> Tu pregunta</div>
@@ -60,7 +57,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick prompts -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title"><i class="card-icon fas fa-bolt"></i> Preguntas rápidas</div>
@@ -95,7 +91,6 @@
                         </div>
                     </div>
 
-                    <!-- Context info -->
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title"><i class="card-icon fas fa-database"></i> Contexto activo</div>
@@ -111,7 +106,6 @@
 
                 </div>
 
-                <!-- RIGHT: Response panel -->
                 <div class="response-area">
                     <div class="card" style="height:100%;">
                         <div class="card-header" id="responseHeader">
@@ -134,7 +128,6 @@
                         </div>
                         <div class="card-body" id="responseBody">
 
-                            <!-- Empty state -->
                             <div class="empty-state" id="emptyState">
                                 <div class="empty-icon">
                                     <i class="fas fa-robot"></i>
@@ -146,7 +139,6 @@
                                 </div>
                             </div>
 
-                            <!-- Loading state -->
                             <div class="loading-state" id="loadingState" style="display:none;">
                                 <div class="loading-orb"></div>
                                 <div class="loading-msg">Analizando tus datos...</div>
@@ -163,7 +155,6 @@
                                 </div>
                             </div>
 
-                            <!-- Response content -->
                             <div id="aiResponseContent" style="display:none;">
                                 <div class="ai-response-content" id="responseContent"></div>
                             </div>
@@ -238,7 +229,6 @@
                 currentData = null;
             }
 
-            // Fill context KPIs
             if (currentData?.kpis) {
                 const entries = Object.entries(currentData.kpis).slice(0, 4);
                 document.getElementById('contextKpis').innerHTML = entries.map(([k, v]) =>
@@ -246,13 +236,10 @@
                 ).join('');
             }
 
-            // Default prompt
             document.getElementById('userPrompt').value = QUICK_PROMPTS.completo;
 
-            // Generate button
             document.getElementById('generateBtn').onclick = generateAIAdvice;
 
-            // Quick prompt chips
             document.querySelectorAll('.quick-chip').forEach(btn => {
                 btn.onclick = () => {
                     const key = btn.dataset.prompt;
@@ -261,7 +248,6 @@
                 };
             });
 
-            // Copy button
             document.getElementById('copyBtn').onclick = () => {
                 navigator.clipboard.writeText(lastResponseText)
                     .then(() => {
@@ -271,7 +257,6 @@
                     });
             };
 
-            // Clear button
             document.getElementById('clearBtn').onclick = resetToEmpty;
         }
 
@@ -302,8 +287,7 @@
             const btn = document.getElementById('generateBtn');
             btn.disabled = true;
 
-            // 1. CLAVE FORZADA (Evita el error "API Key not found")
-                // Use configurable key with prompt fallback
+            // 1. CLAVE FORZADA (Evita el error "API Key not found", que nos dio bastante")
                 let apiKey = window.MISTRAL_API_KEY;
                 if (!apiKey) {
                     apiKey = prompt('Ingresa tu clave API de Mistral (gratis en https://console.mistral.ai/):');
@@ -370,7 +354,6 @@
 
                 lastResponseText = text;
 
-                // Update model badge with successful model
                 const usedModel = 'Mistral Small Latest';
                 document.querySelector('.response-model-badge').innerHTML = `
                     <div class="dot"></div> ${usedModel}
@@ -390,7 +373,6 @@
                 let errorMsg = error.message;
                 let suggestion = '';
 
-                // Simplified: Direct advice for API key issues
                 if (errorMsg.includes('API Key not found') || errorMsg.includes('Unauthorized') || errorMsg.includes('401')) {
                     suggestion = '<br><strong>La clave API no es válida. </strong><br>1. Ve a <a href="https://console.mistral.ai/" target="_blank">console.mistral.ai</a><br>2. Crea una nueva clave GRATIS<br>3. Pégala cuando se te pida.';
                 }
@@ -412,8 +394,6 @@
                 btn.disabled = false;
             }
         }
-
-
 
         function buildContext() {
             if (!currentData) {

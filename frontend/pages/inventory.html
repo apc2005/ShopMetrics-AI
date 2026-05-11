@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopMetrics AI — Inventory</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <!-- Dependencies -->
+    <!-- Dependencias -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Custom CSS and Scripts -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/inventory.css">
     <script src="/js/storage.js"></script>
@@ -30,7 +28,6 @@
         </script>
 
         <div class="content" id="page-content" style="opacity: 0; transition: opacity 0.3s;">
-            <!-- Content will be injected here if inventory exists -->
             <div id="inventoryContainer"></div>
         </div>
     </main>
@@ -155,7 +152,7 @@
             renderInventoryStatus(data.inventory);
             renderTreemap(data.inventory);
 
-            // Activar las cajas "cómo leer" como secciones desplegables
+            // Activar las cajas como secciones desplegables
             if (typeof initCollapsibles === 'function') initCollapsibles();
 
             document.getElementById('page-content').style.opacity = '1';
@@ -254,7 +251,6 @@
                 font: { color: '#f1f2f6' }
             }, { responsive: true, displayModeBar: false });
             
-            // Collapsible functionality for insights
             document.querySelectorAll('.toggle-insight').forEach(icon => {
                 icon.style.transform = 'rotate(0deg)';
                 icon.onclick = function() {

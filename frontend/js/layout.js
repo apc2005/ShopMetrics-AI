@@ -1,4 +1,4 @@
-// Muestra mensajes emergentes en vez de los alert() del navegador
+
 function showToast(message, type = 'info', duration = 4000) {
     let container = document.getElementById('sm-toast-container');
     if (!container) {

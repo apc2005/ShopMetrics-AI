@@ -1,4 +1,4 @@
-/* ── AI PAGE SPECIFIC ── */
+/* Estilos de ai */
         .ai-layout {
             display: grid;
             grid-template-columns: 340px 1fr;
@@ -12,7 +12,6 @@
             }
         }
 
-        /* Sidebar panel */
         .ai-sidebar {
             display: flex;
             flex-direction: column;
@@ -21,7 +20,6 @@
             top: 88px;
         }
 
-        /* Prompt textarea */
         .prompt-textarea {
             width: 100%;
             background: var(--bg-surface);
@@ -46,7 +44,6 @@
             color: var(--text-muted);
         }
 
-        /* Quick prompt chips */
         .quick-prompts {
             display: flex;
             flex-direction: column;
@@ -81,7 +78,6 @@
             flex-shrink: 0;
         }
 
-        /* Generate button */
         .btn-generate {
             width: 100%;
             display: flex;
@@ -125,12 +121,10 @@
             cursor: not-allowed;
         }
 
-        /* Response area */
         .response-area {
             min-height: 500px;
         }
 
-        /* Empty state */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -166,7 +160,6 @@
             line-height: 1.6;
         }
 
-        /* Loading state */
         .loading-state {
             display: flex;
             flex-direction: column;
@@ -237,7 +230,6 @@
             flex-shrink: 0;
         }
 
-        /* AI Response markdown styles */
         .ai-response-content {
             line-height: 1.75;
             font-size: 13.5px;
@@ -355,7 +347,6 @@
             font-style: italic;
         }
 
-        /* Response header meta */
         .response-meta {
             display: flex;
             align-items: center;
@@ -396,7 +387,6 @@
             }
         }
 
-        /* Error card */
         .error-card {
             background: var(--red-bg);
             border: 1px solid rgba(239, 68, 68, 0.3);

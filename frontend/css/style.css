@@ -1,3 +1,4 @@
+/* Estilos generales */
 
         :root {
             --bg-base: #0f1117;
@@ -1369,4 +1370,3 @@
             .settings-grid { grid-template-columns: 1fr; }
             .bell-panel { right: 8px; width: 290px; }
         }
-    

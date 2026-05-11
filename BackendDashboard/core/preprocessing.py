@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-preprocessing.py — Carga, validación y limpieza de datos
-"""
+
+#Carga, validación y limpieza de datos
 
 import pandas as pd
 import numpy as np
@@ -9,7 +8,6 @@ import io
 import json
 import ollama
 from config import STANDARD_COLUMNS
-
 
 def llm_map_columns(headers, sample_rows, max_retries=2):
     """Usa un LLM para mapear columnas de un CSV a un esquema estándar usando similitud semántica y de datos."""
@@ -50,7 +48,6 @@ Responde SOLO con JSON válido en este formato:
         )
         mapping_str = response['message']['content'].strip()
         
-        # Clean markdown code blocks
         if '```json' in mapping_str:
             mapping_str = mapping_str.split('```json')[1].split('```')[0]
         elif '```' in mapping_str:
@@ -93,13 +90,13 @@ def data_validation(df):
             negatives_dict[col] = negatives
     result['negatives'] = negatives_dict
 
-    # 5. Fechas inválidas
+    # 5. Fechas inválidas (esto dio varios fallos)
     if 'date' in df.columns:
         # 1. Convertimos la columna al formato de fecha correcto (DD/MM/YYYY)
         # y guardamos el resultado en el dataframe
         df['date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
         
-        # 2. Ahora sí contamos si ha quedado alguna fecha verdaderamente inválida
+        # 2. Ahora contamos si ha quedado alguna fecha verdaderamente inválida
         invalid_dates = int(df['date'].isnull().sum())
         
         print(f"\nFechas inválidas o no parseadas: {invalid_dates}")
@@ -133,7 +130,6 @@ def load_and_standardize(uploaded_file):
     df.columns = [c.lower().strip().replace(' ', '_').replace('-', '_') for c in df.columns]
     print(f"Columnas detectadas: {list(df.columns)}")
 
-    # LLM Column Mapping (NEW - Replaces hardcoded synonyms)
     headers = list(df.columns)
     sample_df = df.head(3)
     sample_rows = sample_df.to_csv(index=False, header=False) if not sample_df.empty else ""
@@ -141,7 +137,7 @@ def load_and_standardize(uploaded_file):
     col_mapping = llm_map_columns(headers, sample_rows)
     print(f"LLM Mapping: {col_mapping}")
     
-    # Fallback if LLM insufficient
+    # Fallback si el LLM no puede mapear al menos 3 columnas
     if len([v for v in col_mapping.values() if v]) < 3:
         print("LLM insufficient, using traditional synonyms.")
         synonyms = {
@@ -158,7 +154,7 @@ def load_and_standardize(uploaded_file):
             if matched:
                 col_mapping[std_col] = matched[0]
     
-    # Build df_std with LLM/dynamic mapping
+    # Solo asignamos las columnas que el LLM ha identificado
     df_std = pd.DataFrame()
     for std_col, csv_col in col_mapping.items():
         if csv_col in df.columns:
@@ -167,7 +163,7 @@ def load_and_standardize(uploaded_file):
             else:
                 df_std[std_col] = df[csv_col]
     
-    # Fill missing standard columns
+    # Si el LLM no ha podido mapear alguna columna estándar, la creamos vacía o con valores por defecto
     for std_col in STANDARD_COLUMNS:
         if std_col not in df_std.columns:
             print(f"Filling missing '{std_col}'")
@@ -183,7 +179,7 @@ def load_and_standardize(uploaded_file):
     if 'date' in df_std.columns and not df_std['date'].isnull().all():
         df_std['date'] = pd.to_datetime(df_std['date'], dayfirst=True, errors='coerce')
         
-        # Opcional: eliminar las filas que (ahora sí) sean realmente inválidas/nulas
+        # Opcional: eliminar las filas que sean realmente invalidas
         df_std = df_std.dropna(subset=['date'])
 
     return df_std.copy()
@@ -193,20 +189,20 @@ def universal_cleaner(df):
     # 1. Limpieza de Fechas
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-    # 2. Limpieza de Números y manejo de Nulos Críticos - Ensure numeric for downstream agg
+    # 2. Limpieza de Números y manejo de Nulos Críticos 
     for col in ['total_sales', 'profit']:
         if col in df.columns:
             if df[col].dtype == 'object':
                 df[col] = df[col].astype(str).str.replace(r'[^\d.]', '', regex=True)
             df[col] = pd.to_numeric(df[col], errors='coerce')
             median_val = df[col].median()
-            df[col] = df[col].fillna(median_val).astype(float)  # Explicit float dtype
+            df[col] = df[col].fillna(median_val).astype(float)
 
     # 3. Encoding de Categorías (One-Hot Encoding)
     # Creamos variables dummies para que el modelo entienda qué categorías compra cada cliente
     if 'product_category' in df.columns:
         df = pd.get_dummies(df, columns=['product_category'], prefix='cat')
 
-    # Eliminar filas sin ID o fecha (son insalvables para series temporales/RFM)
+    # Eliminar filas sin ID o fecha
     df = df.dropna(subset=['customer_id', 'date'])
     return df

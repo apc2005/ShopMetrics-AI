@@ -1,4 +1,3 @@
-// frontend/js/storage.js
 
 class StorageService {
     constructor() {

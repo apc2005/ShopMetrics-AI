@@ -193,7 +193,6 @@ def analyze():
     except Exception as e:
         return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
 
-
 # Aquí Flask arranca el servidor web. Gunicorn lo usa en Railway.
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5050, debug=False)

@@ -22,7 +22,7 @@
     <main class="main">
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                renderTopbar('Import Data', 'Upload your supermarket logs');
+                renderTopbar('Importar Datos', 'Sube tu archivo CSV para análisis');
             });
         </script>
         
@@ -30,10 +30,10 @@
             <div id="uploadSection" style="display: flex;">
                 <div class="upload-card" id="uploadArea">
                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                    <h2>Import your dataset</h2>
+                    <h2>Importa tu dataset</h2>
                     <p><strong>Archivo CSV requerido</strong> (solo .csv)<br>Columnas mínimas: customer_id, date, total_sales<br>Drag & drop aquí o haz clic abajo</p>
                     <label for="csvFile2" class="btn-upload">
-                        <i class="fas fa-folder-open"></i> Select CSV file
+                        <i class="fas fa-folder-open"></i> Seleccionar csv
                     </label>
                     <input type="file" id="csvFile2" accept=".csv" style="display:none">
                     <div class="upload-hint">Supports: RFM segmentation · Churn prediction · Sales forecast · Inventory analysis</div>

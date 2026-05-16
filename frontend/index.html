@@ -104,7 +104,7 @@
                 steps[2].classList.add('active');
                 
                 try {
-                    const response = await fetch('http://localhost:5050/analyze', { 
+                    const response = await fetch('http://https://shopmetrics-ai-1.onrender.com/analyze', { 
                         method: 'POST', 
                         body: formData 
                     });
@@ -124,7 +124,7 @@
                     
                 } catch (error) {
                     console.error(error);
-                    showToast('Error: ' + error.message + ' — Verifica que el servidor esté en http://localhost:5050', 'error', 7000);
+                    showToast('Error: ' + error.message + ' — Verifica que el servidor esté en https://shopmetrics-ai-1.onrender.com', 'error', 7000);
                     uploadSection.style.display = 'flex';
                     loadingSection.style.display = 'none';
                     steps.forEach(step => step.classList.remove('active'));

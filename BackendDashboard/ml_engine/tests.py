@@ -4,7 +4,7 @@ import pandas as pd
 with open('SuperMarket Analysis.csv', 'rb') as f:
 
     files = {'file': f}
-    response = requests.post('http://localhost:5050/analyze', files=files)
+    response = requests.post('https://shopmetrics-ai-1.onrender.com/analyze', files=files)
 
 print('Status:', response.status_code)
 if response.status_code == 200:

@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./BackendDashboard
+    ports:
+      - "5050:5050"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80"
